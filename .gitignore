@@ -1,0 +1,7 @@
+node_modules/
+dist/
+dist-app/
+bin/whisper-cli
+bin/ggml-base.en.bin
+*.wav
+*.txt

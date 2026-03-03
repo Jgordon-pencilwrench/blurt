@@ -1,0 +1,23 @@
+appId: com.blurt.app
+productName: Blurt
+directories:
+  output: dist-app
+files:
+  - dist/**/*
+  - bin/**/*
+  - src/overlay/**/*
+  - src/preferences/**/*
+  - assets/**/*
+extraResources:
+  - from: bin/
+    to: bin/
+    filter:
+      - "whisper-cli"
+      - "ggml-base.en.bin"
+mac:
+  category: public.app-category.productivity
+  target:
+    - target: dmg
+      arch: arm64
+dmg:
+  title: Blurt

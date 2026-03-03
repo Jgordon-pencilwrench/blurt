@@ -1,0 +1,21 @@
+{
+  "name": "blurt",
+  "version": "0.1.0",
+  "description": "Offline voice-to-text macOS menubar app",
+  "main": "dist/main/index.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "yarn build && electron .",
+    "download-assets": "ts-node scripts/download-assets.ts",
+    "dist": "yarn build && electron-builder --mac --arm64",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "electron": "^34.0.0",
+    "electron-builder": "^25.0.0",
+    "ts-node": "^10.9.0",
+    "typescript": "^5.4.0",
+    "vitest": "^2.0.0"
+  }
+}
