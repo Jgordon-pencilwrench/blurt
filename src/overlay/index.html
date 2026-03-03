@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="overlay.css">
+</head>
+<body>
+  <div id="app">
+    <div id="recording-state" class="state active">
+      <canvas id="waveform"></canvas>
+      <div class="controls">
+        <span class="logo">▲</span>
+        <div class="buttons">
+          <button id="stop-btn">Stop <kbd>⌥Space</kbd></button>
+          <button id="cancel-btn" class="secondary">Cancel <kbd>esc</kbd></button>
+        </div>
+      </div>
+    </div>
+    <div id="processing-state" class="state">
+      <div class="status-text">Transcribing...</div>
+    </div>
+    <div id="streaming-state" class="state">
+      <div id="output-text"></div>
+      <div class="controls">
+        <span class="logo">▲</span>
+        <button id="close-btn" class="secondary">Close <kbd>esc</kbd></button>
+      </div>
+    </div>
+  </div>
+  <script src="overlay.js"></script>
+</body>
+</html>
