@@ -1,19 +1,16 @@
-import { app, BrowserWindow } from 'electron'
+import { app } from 'electron'
+import { setupTray } from './tray'
+import { loadModes } from './modes'
 
-// Single instance lock
-if (!app.requestSingleInstanceLock()) {
-  app.quit()
-  process.exit(0)
-}
-
-// Hide from Dock — menubar only
+if (!app.requestSingleInstanceLock()) { app.quit(); process.exit(0) }
 app.dock?.hide()
 
 app.whenReady().then(async () => {
-  // Tray, hotkey, setup wizard wired in later tasks
-  console.log('Blurt ready')
+  loadModes() // ensure config dir exists
+  setupTray(
+    (mode) => console.log('Mode changed to:', mode.name),
+    () => console.log('Open preferences')
+  )
 })
 
-app.on('window-all-closed', () => {
-  // Don't quit when all windows close — we live in the tray
-})
+app.on('window-all-closed', () => {})
