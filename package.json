@@ -1,6 +1,6 @@
 {
   "name": "blurt",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Offline voice-to-text macOS menubar app",
   "main": "dist/main/index.js",
   "scripts": {
