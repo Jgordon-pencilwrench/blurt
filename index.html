@@ -278,6 +278,32 @@
   .model-cards { grid-template-columns: 1fr; }
   .mode-cards { grid-template-columns: 1fr; }
 }
+.privacy-inner {
+  text-align: center;
+  padding: 64px 48px;
+  border-color: rgba(167,139,250,0.2);
+}
+.privacy-lock { font-size: 48px; margin-bottom: 20px; }
+.privacy-statement {
+  font-size: clamp(24px, 4vw, 40px);
+  font-weight: 700; letter-spacing: -0.02em;
+  margin-bottom: 24px;
+  background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent) 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.privacy-detail {
+  font-size: 16px; color: var(--text-secondary);
+  max-width: 620px; margin: 0 auto 32px;
+  line-height: 1.7;
+}
+.privacy-pills { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+.pill {
+  background: var(--accent-dim); color: var(--accent);
+  border: 1px solid var(--accent-glow);
+  padding: 6px 16px; border-radius: 20px;
+  font-size: 13px; font-weight: 500;
+}
   </style>
 </head>
 <body>
@@ -479,6 +505,24 @@
         <p>Open Preferences and build your own mode with a custom system prompt. Name it, tune it, use it from the menubar.</p>
       </div>
       <div class="custom-mode-icon">✏️</div>
+    </div>
+  </div>
+</section>
+<section class="section privacy">
+  <div class="container">
+    <div class="privacy-inner reveal glass">
+      <div class="privacy-lock">🔐</div>
+      <div class="privacy-statement">No account. No API key. No internet.</div>
+      <p class="privacy-detail">
+        Blurt uses Whisper.cpp for transcription and Llama.cpp for summarisation — both compiled with Metal GPU support and running entirely on your Mac. Your voice recordings are processed in memory and written only to a temporary file on your local disk, deleted immediately after transcription. Nothing is sent anywhere.
+      </p>
+      <div class="privacy-pills">
+        <span class="pill">On-device Whisper</span>
+        <span class="pill">On-device LLM</span>
+        <span class="pill">Metal GPU</span>
+        <span class="pill">Zero telemetry</span>
+        <span class="pill">No account required</span>
+      </div>
     </div>
   </div>
 </section>
