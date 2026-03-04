@@ -2,10 +2,14 @@ import fs from 'fs'
 import path from 'path'
 import { app } from 'electron'
 
+let _logPath: string | null = null
+
 function getLogPath(): string {
+  if (_logPath) return _logPath
   const logsDir = app.getPath('logs')
   fs.mkdirSync(logsDir, { recursive: true })
-  return path.join(logsDir, 'main.log')
+  _logPath = path.join(logsDir, 'main.log')
+  return _logPath
 }
 
 function write(level: string, message: string, error?: unknown): void {

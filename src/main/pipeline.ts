@@ -86,7 +86,11 @@ async function stopRecording() {
     const message = err instanceof Error ? err.message : String(err)
     log.error('Pipeline error', err instanceof Error ? err : new Error(message))
     sendToOverlay('overlay-state', 'error', message)
-    setTimeout(() => hideOverlay(), 4000)
+    const errorTimer = setTimeout(() => hideOverlay(), 4000)
+    ipcMain.once('overlay-close', () => {
+      clearTimeout(errorTimer)
+      hideOverlay()
+    })
   } finally {
     isRunning = false
     ipcMain.removeAllListeners('overlay-pause')
