@@ -208,3 +208,28 @@ kbd {
   border-radius: 3px;
   padding: 1px 4px;
 }
+
+/* ── Error state ─────────────────────────────────────────── */
+.error-icon {
+  font-size: 22px;
+  color: rgba(255, 80, 80, 0.85);
+  text-align: center;
+  padding-top: 18px;
+}
+
+.error-text {
+  color: rgba(255, 100, 100, 0.9);
+  font-size: 13px;
+  text-align: center;
+  padding: 4px 8px 0;
+  letter-spacing: 0.03em;
+  word-break: break-word;
+}
+
+.error-hint {
+  font-size: 10px;
+  color: rgba(255,245,220,0.30);
+  text-align: center;
+  padding-top: 6px;
+  font-family: 'Menlo', 'Monaco', monospace;
+}

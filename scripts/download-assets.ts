@@ -51,7 +51,7 @@ async function main() {
     if (!existsSync(WHISPER_TMP)) {
       run(`git clone --depth 1 ${WHISPER_REPO} ${WHISPER_TMP}`)
     }
-    run('cmake -B build -DGGML_METAL=ON', WHISPER_TMP)
+    run('cmake -B build -DGGML_METAL=ON -DBUILD_SHARED_LIBS=OFF -DCMAKE_BUILD_TYPE=Release', WHISPER_TMP)
     run('cmake --build build --config Release -j4', WHISPER_TMP)
     run(`cp ${WHISPER_TMP}/build/bin/whisper-cli ${WHISPER_BINARY}`)
     console.log('whisper-cli built successfully.')
@@ -73,7 +73,7 @@ async function main() {
     if (!existsSync(LLAMA_TMP)) {
       run(`git clone --depth 1 ${LLAMA_REPO} ${LLAMA_TMP}`)
     }
-    run('cmake -B build -DGGML_METAL=ON', LLAMA_TMP)
+    run('cmake -B build -DGGML_METAL=ON -DBUILD_SHARED_LIBS=OFF -DLLAMA_CURL=OFF -DLLAMA_OPENSSL=OFF -DCMAKE_BUILD_TYPE=Release', LLAMA_TMP)
     run('cmake --build build --config Release -j4', LLAMA_TMP)
     run(`cp ${LLAMA_TMP}/build/bin/llama-completion ${LLAMA_BINARY}`)
     console.log('llama-completion built successfully.')
