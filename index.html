@@ -232,6 +232,52 @@
 }
 @media (max-width: 900px) { .feature-grid { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 560px) { .feature-grid { grid-template-columns: 1fr; } }
+.model-cards {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 20px; margin-bottom: 80px;
+}
+.model-card { padding: 28px 24px; position: relative; }
+.model-card-featured {
+  border-color: var(--accent-glow);
+  box-shadow: 0 0 40px rgba(167,139,250,0.1), var(--shadow);
+}
+.model-badge {
+  position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+  background: var(--accent); color: #0d0d0f;
+  padding: 3px 14px; border-radius: 12px;
+  font-size: 11px; font-weight: 700; letter-spacing: 0.05em;
+  text-transform: uppercase; white-space: nowrap;
+}
+.model-name { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+.model-speed { font-size: 13px; font-weight: 500; margin-bottom: 4px; }
+.speed-fast { color: #30d158; }
+.speed-balanced { color: var(--accent); }
+.speed-capable { color: #ffd60a; }
+.model-size { font-size: 12px; color: var(--text-tertiary); margin-bottom: 16px; }
+.model-desc { font-size: 14px; color: var(--text-secondary); line-height: 1.5; }
+.modes-header { margin-top: 60px; margin-bottom: 40px; }
+.modes-subhead { font-size: 16px; color: var(--text-secondary); max-width: 520px; }
+.mode-cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 24px; }
+.mode-card { padding: 24px; display: flex; flex-direction: column; justify-content: space-between; gap: 16px; }
+.mode-top { display: flex; gap: 16px; align-items: flex-start; }
+.mode-icon { font-size: 28px; flex-shrink: 0; margin-top: 2px; }
+.mode-info h3 { font-size: 16px; font-weight: 600; margin-bottom: 6px; }
+.mode-info p { font-size: 13px; color: var(--text-secondary); line-height: 1.5; }
+.mode-footer { border-top: 1px solid var(--border); padding-top: 12px; }
+.best-with { font-size: 12px; color: var(--text-tertiary); }
+.best-with strong { color: var(--accent); font-weight: 500; }
+.custom-mode-cta {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 28px 32px; margin-top: 8px;
+  border-color: var(--border-hover);
+}
+.custom-mode-cta h3 { font-size: 20px; font-weight: 700; margin-bottom: 6px; }
+.custom-mode-cta p { font-size: 14px; color: var(--text-secondary); max-width: 500px; }
+.custom-mode-icon { font-size: 48px; flex-shrink: 0; opacity: 0.7; }
+@media (max-width: 768px) {
+  .model-cards { grid-template-columns: 1fr; }
+  .mode-cards { grid-template-columns: 1fr; }
+}
   </style>
 </head>
 <body>
@@ -344,6 +390,95 @@
         <h3>Menubar Native</h3>
         <p>Lives in your menubar. No Dock presence. Switch modes instantly from the tray menu. Single-instance, always ready.</p>
       </div>
+    </div>
+  </div>
+</section>
+<section class="section models-modes">
+  <div class="container">
+    <div class="section-label reveal">Under the hood</div>
+    <h2 class="section-title reveal">Three cutting-edge AI brains,<br>running entirely on your Mac.</h2>
+    <div class="model-cards reveal">
+      <div class="model-card glass">
+        <div class="model-name">Llama 3.2 1B</div>
+        <div class="model-speed speed-fast">⚡ Fastest</div>
+        <div class="model-size">0.8 GB</div>
+        <p class="model-desc">Instant results, minimal memory. Best for quick captures where speed matters most.</p>
+      </div>
+      <div class="model-card glass model-card-featured">
+        <div class="model-badge">Recommended</div>
+        <div class="model-name">SmolLM3 3B</div>
+        <div class="model-speed speed-balanced">⚖️ Balanced</div>
+        <div class="model-size">1.9 GB</div>
+        <p class="model-desc">The sweet spot. Best balance of speed and output quality for everyday use.</p>
+      </div>
+      <div class="model-card glass">
+        <div class="model-name">Qwen3 4B</div>
+        <div class="model-speed speed-capable">🧠 Most Capable</div>
+        <div class="model-size">2.5 GB</div>
+        <p class="model-desc">Richest, most nuanced output. Worth the extra second for complex summarisation.</p>
+      </div>
+    </div>
+
+    <div class="modes-header reveal">
+      <h2 class="section-title" style="margin-bottom:16px">A mode for every kind of creation.</h2>
+      <p class="modes-subhead">Each mode is a tuned system prompt that shapes how Blurt refines your speech.</p>
+    </div>
+    <div class="mode-cards reveal">
+      <div class="mode-card glass">
+        <div class="mode-top">
+          <div class="mode-icon">📝</div>
+          <div class="mode-info">
+            <h3>Quick Note</h3>
+            <p>Compresses to bullet points. Removes filler, preserves names, dates, and code references.</p>
+          </div>
+        </div>
+        <div class="mode-footer">
+          <span class="best-with">Best with <strong>SmolLM3 3B</strong></span>
+        </div>
+      </div>
+      <div class="mode-card glass">
+        <div class="mode-top">
+          <div class="mode-icon">💬</div>
+          <div class="mode-info">
+            <h3>Message</h3>
+            <p>Cleans up into conversational prose. Fixes grammar, keeps your tone and intent intact.</p>
+          </div>
+        </div>
+        <div class="mode-footer">
+          <span class="best-with">Best with <strong>SmolLM3 3B</strong></span>
+        </div>
+      </div>
+      <div class="mode-card glass">
+        <div class="mode-top">
+          <div class="mode-icon">🤖</div>
+          <div class="mode-info">
+            <h3>Agent</h3>
+            <p>Terse, precise instructions for AI coding agents. Extracts intent, preserves identifiers and code references.</p>
+          </div>
+        </div>
+        <div class="mode-footer">
+          <span class="best-with">Best with <strong>Qwen3 4B</strong></span>
+        </div>
+      </div>
+      <div class="mode-card glass">
+        <div class="mode-top">
+          <div class="mode-icon">🛠</div>
+          <div class="mode-info">
+            <h3>Dev Note</h3>
+            <p>Preserves code identifiers, uses bullets and numbered steps. Flags bugs and gotchas automatically.</p>
+          </div>
+        </div>
+        <div class="mode-footer">
+          <span class="best-with">Best with <strong>Qwen3 4B</strong></span>
+        </div>
+      </div>
+    </div>
+    <div class="custom-mode-cta reveal glass">
+      <div class="custom-mode-text">
+        <h3>None of these fit?</h3>
+        <p>Open Preferences and build your own mode with a custom system prompt. Name it, tune it, use it from the menubar.</p>
+      </div>
+      <div class="custom-mode-icon">✏️</div>
     </div>
   </div>
 </section>
