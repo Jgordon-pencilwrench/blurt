@@ -53,7 +53,7 @@ function onResume() {
 }
 
 async function stopRecording() {
-  const wavPath = recorder.stop()
+  const wavPath = await recorder.stop()
 
   try {
     sendToOverlay('overlay-state', 'processing', 'Transcribing...')
@@ -75,9 +75,9 @@ async function stopRecording() {
     const canType = systemPreferences.isTrustedAccessibilityClient(false)
     if (frontmostApp && canType) {
       typeIntoApp(fullText, frontmostApp)
-      sendToOverlay('overlay-state', 'done', 'Typed ✓')
+      sendToOverlay('overlay-state', 'done', 'Typed \u2713')
     } else {
-      sendToOverlay('overlay-state', 'done', 'Copied to clipboard ✓ — press ⌘V to paste')
+      sendToOverlay('overlay-state', 'done', 'Copied to clipboard \u2713 \u2014 press \u2318V to paste')
     }
 
   } catch (err) {
@@ -91,7 +91,7 @@ async function stopRecording() {
 }
 
 function cancelPipeline() {
-  if (recorder.isRecording) recorder.stop()
+  if (recorder.isRecording) recorder.cancel()
   hideOverlay()
   isRunning = false
   ipcMain.removeAllListeners('overlay-stop')

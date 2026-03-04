@@ -9,19 +9,8 @@ const canvas = document.getElementById('waveform')
 const ctx = canvas.getContext('2d')
 let analyser, animFrame
 
-async function startWaveform() {
-  try {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
-    const audioCtx = new AudioContext()
-    const source = audioCtx.createMediaStreamSource(stream)
-    analyser = audioCtx.createAnalyser()
-    analyser.fftSize = 256
-    source.connect(analyser)
-    drawWaveform()
-  } catch (e) {
-    console.warn('Waveform unavailable:', e)
-  }
-}
+// Audio recording state
+let audioCtx, mediaStream, scriptNode, pcmChunks
 
 function drawWaveform() {
   animFrame = requestAnimationFrame(drawWaveform)
@@ -46,6 +35,100 @@ function stopWaveform() {
   animFrame = null
 }
 
+function encodeWAV(samples, sampleRate) {
+  const numSamples = samples.length
+  const buf = new ArrayBuffer(44 + numSamples * 2)
+  const view = new DataView(buf)
+
+  function writeStr(offset, str) {
+    for (let i = 0; i < str.length; i++) view.setUint8(offset + i, str.charCodeAt(i))
+  }
+
+  writeStr(0, 'RIFF')
+  view.setUint32(4, 36 + numSamples * 2, true)
+  writeStr(8, 'WAVE')
+  writeStr(12, 'fmt ')
+  view.setUint32(16, 16, true)           // chunk size
+  view.setUint16(20, 1, true)            // PCM format
+  view.setUint16(22, 1, true)            // mono
+  view.setUint32(24, sampleRate, true)
+  view.setUint32(28, sampleRate * 2, true) // byte rate
+  view.setUint16(32, 2, true)            // block align
+  view.setUint16(34, 16, true)           // bits per sample
+  writeStr(36, 'data')
+  view.setUint32(40, numSamples * 2, true)
+
+  for (let i = 0; i < numSamples; i++) {
+    const s = Math.max(-1, Math.min(1, samples[i]))
+    view.setInt16(44 + i * 2, s * 0x7fff, true)
+  }
+
+  return new Uint8Array(buf)
+}
+
+async function startRecording() {
+  pcmChunks = []
+  audioCtx = new AudioContext({ sampleRate: 16000 })
+  mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true })
+  const source = audioCtx.createMediaStreamSource(mediaStream)
+
+  // Waveform analyser
+  analyser = audioCtx.createAnalyser()
+  analyser.fftSize = 256
+  source.connect(analyser)
+  drawWaveform()
+
+  // PCM capture
+  scriptNode = audioCtx.createScriptProcessor(4096, 1, 1)
+  scriptNode.onaudioprocess = (e) => {
+    const input = e.inputBuffer.getChannelData(0)
+    pcmChunks.push(new Float32Array(input))
+  }
+  source.connect(scriptNode)
+  scriptNode.connect(audioCtx.destination)
+}
+
+function stopRecording() {
+  stopWaveform()
+
+  // Concatenate PCM chunks into single Float32Array
+  const totalLen = pcmChunks.reduce((sum, c) => sum + c.length, 0)
+  const merged = new Float32Array(totalLen)
+  let offset = 0
+  for (const chunk of pcmChunks) {
+    merged.set(chunk, offset)
+    offset += chunk.length
+  }
+
+  // Encode and send WAV to main process
+  const wavBytes = encodeWAV(merged, 16000)
+  window.electronAPI.sendRecordingData(wavBytes)
+
+  // Cleanup
+  if (scriptNode) { scriptNode.disconnect(); scriptNode = null }
+  if (mediaStream) { mediaStream.getTracks().forEach(t => t.stop()); mediaStream = null }
+  if (audioCtx) { audioCtx.close(); audioCtx = null }
+  pcmChunks = []
+}
+
+function pauseRecording() {
+  if (audioCtx && audioCtx.state === 'running') audioCtx.suspend()
+  stopWaveform()
+}
+
+function resumeRecording() {
+  if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume()
+  drawWaveform()
+}
+
+// Listen for recording commands from main process
+window.electronAPI.onRecordingCommand((command) => {
+  if (command === 'start') startRecording()
+  else if (command === 'stop') stopRecording()
+  else if (command === 'pause') pauseRecording()
+  else if (command === 'resume') resumeRecording()
+})
+
 // Pause state
 let isPaused = false
 
@@ -55,7 +138,6 @@ function setRecordingVisual(paused) {
   const pauseBtn = document.getElementById('pause-btn')
 
   if (paused) {
-    stopWaveform()
     dot.style.background = 'rgba(255,245,220,0.3)'
     dot.style.animationPlayState = 'paused'
     label.textContent = 'Paused'
@@ -65,11 +147,10 @@ function setRecordingVisual(paused) {
   } else {
     dot.style.background = ''
     dot.style.animationPlayState = ''
-    label.textContent = 'Listening…'
+    label.textContent = 'Listening\u2026'
     pauseBtn.textContent = 'Pause'
     pauseBtn.classList.remove('primary-btn')
     pauseBtn.classList.add('ghost-btn')
-    startWaveform()
   }
 }
 

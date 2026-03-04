@@ -5,126 +5,371 @@
   <title>Blurt Setup</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif; font-size: 14px; color: #1a1a1a; background: #f5f5f5; padding: 32px; }
-    h1 { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
-    .subtitle { color: #666; margin-bottom: 28px; }
-    .step { background: #fff; border: 1px solid #e0e0e0; border-radius: 10px; padding: 18px 20px; margin-bottom: 12px; display: flex; align-items: flex-start; gap: 14px; }
-    .step.done { border-color: #27ae60; background: #f0fff4; }
-    .step.done .step-icon { color: #27ae60; }
-    .step-icon { font-size: 22px; flex-shrink: 0; margin-top: 2px; }
-    .step-body { flex: 1; }
-    .step-title { font-weight: 600; margin-bottom: 4px; }
-    .step-desc { color: #666; font-size: 13px; margin-bottom: 10px; line-height: 1.5; }
-    .step-desc:last-child { margin-bottom: 0; }
-    button { background: #000; color: #fff; border: none; border-radius: 8px; padding: 7px 14px; font-size: 13px; cursor: pointer; margin-right: 8px; margin-top: 4px; }
-    button:hover { opacity: 0.8; }
-    button.secondary { background: #e0e0e0; color: #333; }
-    .progress { font-size: 12px; color: #555; margin-top: 8px; font-style: italic; }
-    #done-btn { display: none; margin-top: 20px; width: 100%; padding: 12px; font-size: 15px; border-radius: 10px; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
+      font-size: 13px;
+      color: #1c1a17;
+      background: #f5f3ef;
+      padding: 32px 28px;
+      -webkit-user-select: none;
+    }
+
+    h1 { font-size: 22px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 4px; }
+    .subtitle { color: #9c9488; font-size: 13px; margin-bottom: 24px; }
+
+    /* ── Steps ──────────────────────────────────────────── */
+    .step { margin-bottom: 24px; }
+    .step-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+      color: #9c9488;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .step-label .check { color: #27ae60; display: none; }
+    .step-label.done .check { display: inline; }
+    .step-label.done { color: #27ae60; }
+
+    /* ── Model cards ───────────────────────────────────── */
+    .model-cards {
+      display: flex;
+      gap: 10px;
+    }
+    .model-card {
+      flex: 1;
+      background: #fff;
+      border: 2px solid #e5e1db;
+      border-radius: 10px;
+      padding: 14px;
+      cursor: pointer;
+      transition: border-color 0.15s, box-shadow 0.15s, transform 0.1s;
+      position: relative;
+    }
+    .model-card:hover { border-color: #c8c3ba; transform: translateY(-1px); }
+    .model-card.selected {
+      border-color: #d4a020;
+      box-shadow: 0 0 0 2px rgba(212,160,32,0.2);
+    }
+    .model-card .card-name {
+      font-weight: 700;
+      font-size: 13px;
+      margin-bottom: 2px;
+    }
+    .model-card .card-meta {
+      font-size: 11px;
+      color: #9c9488;
+      margin-bottom: 6px;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    .card-size {
+      background: #eae7e1;
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-weight: 600;
+      font-size: 10px;
+    }
+    .card-speed {
+      letter-spacing: 0.03em;
+    }
+    .model-card .card-desc {
+      font-size: 11px;
+      color: #7a7368;
+      line-height: 1.45;
+    }
+    .badge-rec {
+      position: absolute;
+      top: -8px;
+      right: 10px;
+      background: #d4a020;
+      color: #fff;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 2px 7px;
+      border-radius: 4px;
+    }
+
+    /* ── Download progress ──────────────────────────────── */
+    #download-area { display: none; margin-top: 12px; }
+    .progress-bar-bg {
+      height: 6px;
+      background: #e5e1db;
+      border-radius: 3px;
+      overflow: hidden;
+      margin-bottom: 6px;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      background: #d4a020;
+      border-radius: 3px;
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+    .progress-text {
+      font-size: 11px;
+      color: #9c9488;
+    }
+
+    /* ── Permission rows ────────────────────────────────── */
+    .perm-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #fff;
+      border: 1px solid #e5e1db;
+      border-radius: 8px;
+      padding: 12px 14px;
+      margin-bottom: 8px;
+    }
+    .perm-row.done {
+      border-color: #27ae60;
+      background: #f4fdf7;
+    }
+    .perm-info { flex: 1; }
+    .perm-title { font-weight: 600; font-size: 13px; }
+    .perm-desc { font-size: 11px; color: #9c9488; margin-top: 2px; }
+    .perm-status { margin-left: 12px; font-size: 14px; }
+
+    /* ── Buttons ────────────────────────────────────────── */
+    button {
+      font-family: inherit;
+      font-size: 13px;
+      cursor: pointer;
+      border: none;
+      border-radius: 7px;
+      padding: 8px 16px;
+      font-weight: 600;
+      transition: background 0.15s, opacity 0.15s;
+    }
+    button:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .btn-primary { background: #1c1a17; color: #f5f3ef; }
+    .btn-primary:hover:not(:disabled) { background: #3a3730; }
+
+    .btn-amber { background: #d4a020; color: #fff; }
+    .btn-amber:hover:not(:disabled) { background: #b8890e; }
+
+    .btn-ghost {
+      background: transparent;
+      color: #9c9488;
+      border: 1px solid #d8d4cc;
+    }
+    .btn-ghost:hover:not(:disabled) { background: #eae7e1; color: #1c1a17; }
+
+    #download-btn { margin-top: 14px; width: 100%; padding: 10px; font-size: 14px; }
+
+    /* ── Done button ────────────────────────────────────── */
+    #done-btn {
+      display: none;
+      margin-top: 8px;
+      width: 100%;
+      padding: 12px;
+      font-size: 15px;
+      border-radius: 10px;
+    }
+    #done-btn.show {
+      display: block;
+      animation: fadeUp 0.3s ease;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
   </style>
 </head>
 <body>
   <h1>Welcome to Blurt</h1>
-  <p class="subtitle">A few things need to be set up before you start.</p>
+  <p class="subtitle">Choose a model and grant permissions to get started.</p>
 
-  <div id="step-ollama" class="step">
-    <div class="step-icon">🤖</div>
-    <div class="step-body">
-      <div class="step-title">Ollama (local AI)</div>
-      <div class="step-desc">Blurt uses Ollama to summarise your voice notes locally, with no data leaving your machine.</div>
-      <div id="ollama-actions">
-        <button id="check-ollama-btn">Check again</button>
-        <button id="open-ollama-btn" class="secondary">Install Ollama…</button>
+  <!-- Step 1: Model -->
+  <div class="step" id="step-model">
+    <div class="step-label" id="model-label">
+      <span>Choose your model</span>
+      <span class="check">&#10003;</span>
+    </div>
+    <div class="model-cards" id="model-cards"></div>
+    <div id="download-area">
+      <div class="progress-bar-bg"><div class="progress-bar-fill" id="progress-fill"></div></div>
+      <div class="progress-text" id="progress-text">Preparing download...</div>
+    </div>
+    <button id="download-btn" class="btn-amber" disabled>Download &amp; Continue</button>
+  </div>
+
+  <!-- Step 2: Permissions -->
+  <div class="step" id="step-perms">
+    <div class="step-label" id="perms-label">
+      <span>Permissions</span>
+      <span class="check">&#10003;</span>
+    </div>
+
+    <div class="perm-row" id="mic-row">
+      <div class="perm-info">
+        <div class="perm-title">Microphone</div>
+        <div class="perm-desc">Required to record your voice.</div>
       </div>
-      <div id="pull-actions" style="display:none">
-        <button id="pull-btn">Download llama3.2:3b model</button>
-        <div id="pull-progress" class="progress"></div>
+      <button id="mic-btn" class="btn-primary">Grant</button>
+      <div class="perm-status" id="mic-status" style="display:none">&#10003;</div>
+    </div>
+
+    <div class="perm-row" id="a11y-row">
+      <div class="perm-info">
+        <div class="perm-title">Accessibility <span style="font-weight:400;color:#9c9488;font-size:11px">(optional)</span></div>
+        <div class="perm-desc">Allows typing text at your cursor. Without it, text is copied to clipboard.</div>
       </div>
+      <button id="a11y-btn" class="btn-ghost">Open Settings</button>
+      <div class="perm-status" id="a11y-status" style="display:none">&#10003;</div>
     </div>
   </div>
 
-  <div id="step-mic" class="step">
-    <div class="step-icon">🎙️</div>
-    <div class="step-body">
-      <div class="step-title">Microphone access</div>
-      <div class="step-desc">Blurt needs microphone access to record your voice.</div>
-      <button id="mic-btn">Grant access</button>
-    </div>
-  </div>
-
-  <div id="step-a11y" class="step">
-    <div class="step-icon">⌨️</div>
-    <div class="step-body">
-      <div class="step-title">Accessibility (auto-type)</div>
-      <div class="step-desc">To type text directly at your cursor, Blurt needs Accessibility permission. Without it, text is copied to your clipboard instead.</div>
-      <button id="a11y-btn">Open Accessibility Settings</button>
-    </div>
-  </div>
-
-  <button id="done-btn">Start using Blurt →</button>
+  <button id="done-btn" class="btn-primary">Start using Blurt &#8594;</button>
 
   <script>
     let status = {}
+    let selectedModelId = null
+    let downloading = false
+    let modelReady = false
+
+    function renderCards(catalog, activeModelId) {
+      const container = document.getElementById('model-cards')
+      container.innerHTML = ''
+      catalog.forEach(m => {
+        const card = document.createElement('div')
+        card.className = 'model-card' + (m.id === activeModelId ? ' selected' : '')
+        card.dataset.id = m.id
+        card.innerHTML = `
+          ${m.recommended ? '<div class="badge-rec">Recommended</div>' : ''}
+          <div class="card-name">${m.name}</div>
+          <div class="card-meta">
+            <span class="card-size">${m.size}</span>
+            <span class="card-speed">${m.speed}</span>
+          </div>
+          <div class="card-desc">${m.description}</div>
+        `
+        card.addEventListener('click', () => {
+          if (downloading) return
+          selectedModelId = m.id
+          container.querySelectorAll('.model-card').forEach(c => c.classList.remove('selected'))
+          card.classList.add('selected')
+          document.getElementById('download-btn').disabled = false
+        })
+        container.appendChild(card)
+      })
+    }
 
     function updateUI() {
-      const ollamaStep = document.getElementById('step-ollama')
-      const micStep = document.getElementById('step-mic')
-      const a11yStep = document.getElementById('step-a11y')
+      const micGranted = status.micGranted
+      const canType = status.canType
 
-      if (status.ollamaReady) {
-        ollamaStep.classList.add('done')
-        ollamaStep.querySelector('.step-icon').textContent = '✅'
-        document.getElementById('ollama-actions').style.display = 'none'
-        document.getElementById('pull-actions').style.display = 'none'
-      } else {
-        document.getElementById('pull-actions').style.display = 'block'
-      }
-
-      if (status.micGranted) {
-        micStep.classList.add('done')
-        micStep.querySelector('.step-icon').textContent = '✅'
+      // Mic row
+      if (micGranted) {
+        document.getElementById('mic-row').classList.add('done')
         document.getElementById('mic-btn').style.display = 'none'
+        document.getElementById('mic-status').style.display = 'block'
       }
 
-      if (status.canType) {
-        a11yStep.classList.add('done')
-        a11yStep.querySelector('.step-icon').textContent = '✅'
+      // Accessibility row
+      if (canType) {
+        document.getElementById('a11y-row').classList.add('done')
         document.getElementById('a11y-btn').style.display = 'none'
+        document.getElementById('a11y-status').style.display = 'block'
       }
 
-      // Show done button once Ollama and mic are ready (accessibility is optional)
-      if (status.ollamaReady && status.micGranted) {
-        document.getElementById('done-btn').style.display = 'block'
+      // Check if all required steps done
+      if (micGranted) {
+        document.getElementById('perms-label').classList.add('done')
+      }
+
+      if (modelReady && micGranted) {
+        document.getElementById('done-btn').classList.add('show')
       }
     }
 
-    window.setupAPI.getStatus().then(s => { status = s; updateUI() })
-    window.setupAPI.onPullProgress((msg) => {
-      document.getElementById('pull-progress').textContent = msg
-      if (msg === 'done') {
-        status.ollamaReady = true
+    window.setupAPI.getStatus().then(s => {
+      status = s
+      selectedModelId = s.activeModelId
+      modelReady = s.modelReady
+
+      renderCards(s.catalog, s.activeModelId)
+      document.getElementById('download-btn').disabled = !selectedModelId
+
+      if (s.modelReady) {
+        document.getElementById('model-label').classList.add('done')
+        document.getElementById('download-btn').style.display = 'none'
+        document.getElementById('model-cards').querySelectorAll('.model-card').forEach(c => {
+          c.style.pointerEvents = 'none'
+          c.style.opacity = '0.7'
+        })
+      }
+
+      updateUI()
+    })
+
+    window.setupAPI.onDownloadProgress(data => {
+      document.getElementById('progress-fill').style.width = data.percent + '%'
+      const dlMB = data.downloadedMB.toFixed(1)
+      const totalMB = data.totalMB.toFixed(1)
+      const model = status.catalog.find(m => m.id === data.modelId)
+      document.getElementById('progress-text').textContent =
+        `Downloading ${model ? model.name : ''} (${dlMB} / ${totalMB} MB)`
+
+      if (data.percent >= 100) {
+        modelReady = true
+        document.getElementById('model-label').classList.add('done')
+        document.getElementById('download-area').style.display = 'none'
+        document.getElementById('download-btn').style.display = 'none'
         updateUI()
       }
     })
 
-    document.getElementById('check-ollama-btn').addEventListener('click', async () => {
-      const ok = await window.setupAPI.checkOllama()
-      status.ollamaReady = ok
-      updateUI()
+    document.getElementById('download-btn').addEventListener('click', async () => {
+      if (!selectedModelId || downloading) return
+      downloading = true
+      const btn = document.getElementById('download-btn')
+      btn.disabled = true
+      btn.textContent = 'Downloading\u2026'
+      document.getElementById('download-area').style.display = 'block'
+
+      try {
+        await window.setupAPI.selectAndDownloadModel(selectedModelId)
+        modelReady = true
+        document.getElementById('model-label').classList.add('done')
+        document.getElementById('download-area').style.display = 'none'
+        btn.style.display = 'none'
+        updateUI()
+      } catch (err) {
+        btn.textContent = 'Retry Download'
+        btn.disabled = false
+        document.getElementById('progress-text').textContent = 'Download failed. Please try again.'
+      }
+      downloading = false
     })
-    document.getElementById('open-ollama-btn').addEventListener('click', () => window.setupAPI.openOllama())
-    document.getElementById('pull-btn').addEventListener('click', () => {
-      document.getElementById('pull-btn').disabled = true
-      document.getElementById('pull-btn').textContent = 'Downloading…'
-      window.setupAPI.pullModel()
-    })
+
     document.getElementById('mic-btn').addEventListener('click', async () => {
       const ok = await window.setupAPI.requestMic()
       status.micGranted = ok
       updateUI()
     })
-    document.getElementById('a11y-btn').addEventListener('click', () => window.setupAPI.requestAccessibility())
-    document.getElementById('done-btn').addEventListener('click', () => window.setupAPI.complete())
+
+    document.getElementById('a11y-btn').addEventListener('click', () => {
+      window.setupAPI.requestAccessibility()
+    })
+
+    window.setupAPI.onAccessibilityGranted(() => {
+      status.canType = true
+      updateUI()
+    })
+
+    document.getElementById('done-btn').addEventListener('click', () => {
+      window.setupAPI.complete()
+    })
   </script>
 </body>
 </html>

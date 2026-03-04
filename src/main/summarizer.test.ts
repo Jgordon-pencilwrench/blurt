@@ -1,35 +1,57 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { EventEmitter, Readable } from 'stream'
 
-const mockFetch = vi.fn()
-vi.stubGlobal('fetch', mockFetch)
+const mockSpawn = vi.fn()
+vi.mock('child_process', () => ({ spawn: mockSpawn }))
+vi.mock('electron', () => ({ app: { isPackaged: false } }))
+vi.mock('./settings', () => ({
+  loadSettings: () => ({ hotkey: 'Control+Alt+Space', activeModel: 'smollm3-3b' }),
+}))
+
+import fs from 'fs'
+vi.spyOn(fs, 'existsSync')
 
 describe('Summarizer', () => {
-  it('streams tokens from Ollama and yields them', async () => {
-    const chunks = [
-      JSON.stringify({ response: 'Hello', done: false }) + '\n',
-      JSON.stringify({ response: ' world', done: false }) + '\n',
-      JSON.stringify({ response: '', done: true }) + '\n',
-    ]
-    const encoder = new TextEncoder()
-    const mockStream = {
-      [Symbol.asyncIterator]: async function* () {
-        for (const chunk of chunks) yield encoder.encode(chunk)
-      }
-    }
-    mockFetch.mockResolvedValue({ ok: true, body: mockStream })
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it('spawns llama-completion and yields streamed tokens', async () => {
+    vi.mocked(fs.existsSync).mockReturnValue(true)
+
+    const stdout = new Readable({ read() {} })
+    const child = Object.assign(new EventEmitter(), {
+      stdout,
+      stderr: new Readable({ read() {} }),
+    })
+    mockSpawn.mockReturnValue(child)
 
     const { summarize } = await import('./summarizer')
     const tokens: string[] = []
-    for await (const token of summarize('Hello rambling text', 'Be concise.')) {
+    const gen = summarize('Hello rambling text', 'Be concise.')
+
+    // Push tokens asynchronously
+    setTimeout(() => {
+      stdout.push('Hello')
+      stdout.push(' world')
+      stdout.push(null)
+      child.emit('close', 0)
+    }, 10)
+
+    for await (const token of gen) {
       tokens.push(token)
     }
-    expect(tokens).toEqual(['Hello', ' world'])
+    expect(tokens.join('')).toBe('Hello world')
+    expect(mockSpawn).toHaveBeenCalledWith(
+      expect.stringContaining('llama-completion'),
+      expect.arrayContaining(['-m', expect.any(String), '--no-display-prompt']),
+    )
   })
 
-  it('throws if Ollama is not reachable', async () => {
-    mockFetch.mockRejectedValue(new Error('ECONNREFUSED'))
+  it('throws if model file is missing', async () => {
+    vi.mocked(fs.existsSync).mockReturnValue(false)
     const { summarize } = await import('./summarizer')
     const gen = summarize('text', 'prompt')
-    await expect(gen.next()).rejects.toThrow('ECONNREFUSED')
+    await expect(gen.next()).rejects.toThrow('Model not found')
   })
 })

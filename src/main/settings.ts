@@ -7,10 +7,12 @@ const settingsPath = path.join(configDir, 'settings.json')
 
 export interface Settings {
   hotkey: string
+  activeModel: string
 }
 
 const DEFAULTS: Settings = {
   hotkey: 'Control+Alt+Space',
+  activeModel: 'smollm3-3b',
 }
 
 export function loadSettings(): Settings {

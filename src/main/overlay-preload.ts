@@ -10,4 +10,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
   send: (channel: string) => {
     ipcRenderer.send(channel)
   },
+  onRecordingCommand: (cb: (command: string) => void) => {
+    ipcRenderer.on('recording-command', (_e, command) => cb(command))
+  },
+  sendRecordingData: (buffer: Uint8Array) => {
+    ipcRenderer.send('recording-data', buffer)
+  },
 })

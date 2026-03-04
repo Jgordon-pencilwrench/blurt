@@ -30,7 +30,7 @@ function renderList() {
 }
 
 function selectMode(index) {
-  hideSettingsPanel()
+  hideAllPanels()
   selectedIndex = index
   const mode = modes[index]
   editorTitle.textContent = 'Edit Mode'
@@ -43,7 +43,7 @@ function selectMode(index) {
 }
 
 function newMode() {
-  hideSettingsPanel()
+  hideAllPanels()
   selectedIndex = -1
   editorTitle.textContent = 'New Mode'
   modeName.value = ''
@@ -138,14 +138,21 @@ async function loadSettingsData() {
   hotkeyDisplay.textContent = toDisplay(savedHotkey)
 }
 
-function showSettingsPanel() {
+function hideAllPanels() {
   editor.classList.add('hidden')
+  settingsPanel.classList.add('hidden')
+  modelPanel.classList.add('hidden')
+  generalBtn.classList.remove('selected')
+  modelBtn.classList.remove('selected')
+  document.querySelectorAll('.mode-item').forEach(el => el.classList.remove('selected'))
+}
+
+function showSettingsPanel() {
+  hideAllPanels()
   emptyState.classList.add('hidden')
   settingsPanel.classList.remove('hidden')
   selectedIndex = -1
   generalBtn.classList.add('selected')
-  // Deselect any mode
-  document.querySelectorAll('.mode-item').forEach(el => el.classList.remove('selected'))
   hotkeyError.textContent = ''
   hotkeyDisplay.textContent = toDisplay(savedHotkey)
   pendingHotkey = savedHotkey
@@ -211,3 +218,101 @@ document.getElementById('settings-cancel-btn').addEventListener('click', () => {
 
 // Load settings on startup
 loadSettingsData()
+
+// ── Model panel section ──────────────────────────────────
+
+const modelPanel = document.getElementById('model-panel')
+const modelList  = document.getElementById('model-list')
+const modelBtn   = document.getElementById('model-btn')
+let modelData = null
+let downloadingModelId = null
+
+function showModelPanel() {
+  hideAllPanels()
+  emptyState.classList.add('hidden')
+  modelPanel.classList.remove('hidden')
+  selectedIndex = -1
+  modelBtn.classList.add('selected')
+  renderModelPanel()
+}
+
+async function renderModelPanel() {
+  modelData = await window.prefsAPI.getModelStatus()
+  modelList.innerHTML = ''
+
+  modelData.catalog.forEach(m => {
+    const row = document.createElement('div')
+    row.className = 'model-row' + (m.active ? ' active' : '')
+    row.id = 'model-row-' + m.id
+
+    let actions = ''
+    if (m.downloaded && m.active) {
+      actions = `<span class="badge-active">Active</span>`
+    } else if (m.downloaded) {
+      actions = `
+        <button class="model-btn model-btn-activate" data-action="activate" data-id="${m.id}">Use</button>
+        <button class="model-btn model-btn-delete" data-action="delete" data-id="${m.id}">Delete</button>
+      `
+    } else {
+      actions = `
+        <button class="model-btn model-btn-download" data-action="download" data-id="${m.id}">Download</button>
+      `
+    }
+
+    row.innerHTML = `
+      <div class="model-row-info">
+        <div class="model-row-name">
+          ${m.name}
+          <span class="badge-size">${m.size}</span>
+        </div>
+        <div class="model-row-meta">${m.speed} &middot; ${m.description}</div>
+        <div class="model-progress" id="progress-${m.id}" style="display:none">
+          <div class="model-progress-bar"><div class="model-progress-fill" id="fill-${m.id}"></div></div>
+          <div class="model-progress-text" id="ptext-${m.id}"></div>
+        </div>
+      </div>
+      <div class="model-row-actions">${actions}</div>
+    `
+    modelList.appendChild(row)
+  })
+
+  // Attach event handlers
+  modelList.querySelectorAll('[data-action]').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const action = btn.dataset.action
+      const id = btn.dataset.id
+      if (action === 'activate') {
+        await window.prefsAPI.setActiveModel(id)
+        renderModelPanel()
+      } else if (action === 'download') {
+        downloadingModelId = id
+        btn.disabled = true
+        btn.textContent = 'Downloading\u2026'
+        document.getElementById('progress-' + id).style.display = 'block'
+        try {
+          await window.prefsAPI.downloadModel(id)
+          downloadingModelId = null
+          renderModelPanel()
+        } catch {
+          btn.disabled = false
+          btn.textContent = 'Retry'
+          downloadingModelId = null
+        }
+      } else if (action === 'delete') {
+        if (confirm('Delete this model? You can re-download it later.')) {
+          await window.prefsAPI.deleteModel(id)
+          renderModelPanel()
+        }
+      }
+    })
+  })
+}
+
+window.prefsAPI.onModelDownloadProgress(data => {
+  const fill = document.getElementById('fill-' + data.modelId)
+  const text = document.getElementById('ptext-' + data.modelId)
+  if (fill) fill.style.width = data.percent + '%'
+  if (text) text.textContent = data.downloadedMB.toFixed(1) + ' / ' + data.totalMB.toFixed(1) + ' MB'
+})
+
+modelBtn.addEventListener('click', showModelPanel)
