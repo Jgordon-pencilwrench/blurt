@@ -19,10 +19,17 @@ export function startPipeline() {
   try { frontmostApp = getFrontmostApp() } catch { frontmostApp = null }
 
   const win = showOverlay()
-  win.webContents.once('did-finish-load', () => {
+  const beginRecording = () => {
     sendToOverlay('overlay-state', 'recording')
     recorder.start()
-  })
+  }
+  // did-finish-load only fires on first load; on subsequent uses the page
+  // is already loaded so we send the state immediately
+  if (win.webContents.isLoading()) {
+    win.webContents.once('did-finish-load', beginRecording)
+  } else {
+    beginRecording()
+  }
 
   ipcMain.once('overlay-stop', () => stopRecording())
   ipcMain.once('overlay-cancel', () => cancelPipeline())
@@ -30,13 +37,14 @@ export function startPipeline() {
 
 async function stopRecording() {
   const wavPath = recorder.stop()
-  sendToOverlay('overlay-state', 'processing')
 
   try {
+    sendToOverlay('overlay-state', 'processing', 'Transcribing...')
     const rawText = await transcribe(wavPath)
     const modes = loadModes()
     const activeMode = modes.find(m => m.id === getActiveModeId()) ?? modes[0]
 
+    sendToOverlay('overlay-state', 'processing', 'Summarising...')
     sendToOverlay('overlay-state', 'streaming')
 
     let fullText = ''

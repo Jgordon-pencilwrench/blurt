@@ -66,6 +66,12 @@ kbd {
   font-size: 14px;
   text-align: center;
   padding: 20px;
+  animation: pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
 }
 
 #output-text {

@@ -13,9 +13,13 @@ export function typeIntoApp(text: string, appName: string): void {
   // Escape text for AppleScript string literal
   const escaped = text.replace(/\\/g, '\\\\').replace(/"/g, '\\"')
 
+  // Activate by process name (works for apps like "sublime_text" where the
+  // bundle display name differs from the process name)
   const script = [
-    `tell application "${appName}" to activate`,
-    `delay 0.1`,
+    `tell application "System Events"`,
+    `  set frontmost of first process whose name is "${appName}" to true`,
+    `end tell`,
+    `delay 0.15`,
     `tell application "System Events"`,
     `  keystroke "${escaped}"`,
     `end tell`,

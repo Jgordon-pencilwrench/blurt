@@ -51,6 +51,7 @@ window.electronAPI.onState((state, data) => {
     startWaveform()
   } else if (state === 'processing') {
     stopWaveform()
+    document.getElementById('status-text').textContent = data || 'Transcribing...'
     showState('processing-state')
   } else if (state === 'streaming') {
     document.getElementById('output-text').textContent = ''
