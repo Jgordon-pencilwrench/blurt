@@ -14,7 +14,8 @@ app.whenReady().then(async () => {
   loadModes()
   setupTray(
     (mode) => console.log('Mode:', mode.name),
-    () => openPreferences()
+    () => openPreferences(),
+    () => startPipeline(),
   )
   registerHotkey(() => startPipeline())
 })

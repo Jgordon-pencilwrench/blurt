@@ -101,7 +101,7 @@ body {
 
 /* ── Processing state ────────────────────────────────────── */
 .status-text {
-  color: rgba(255,245,220,0.55);
+  color: rgba(255,245,220,0.90);
   font-size: 13px;
   text-align: center;
   padding: 24px 0 20px;
@@ -111,7 +111,7 @@ body {
 
 @keyframes fade-pulse {
   0%, 100% { opacity: 1; }
-  50% { opacity: 0.35; }
+  50% { opacity: 0.55; }
 }
 
 /* ── Streaming state ─────────────────────────────────────── */

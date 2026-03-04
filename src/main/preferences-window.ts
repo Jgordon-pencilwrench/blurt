@@ -1,6 +1,7 @@
 import { BrowserWindow, ipcMain } from 'electron'
 import path from 'path'
 import { loadModes, saveModes, Mode } from './modes'
+import { rebuildTrayMenu } from './tray'
 
 let prefsWin: BrowserWindow | null = null
 
@@ -27,4 +28,7 @@ export function openPreferences() {
 }
 
 ipcMain.handle('get-modes', () => loadModes())
-ipcMain.handle('save-modes', (_e, modes: Mode[]) => saveModes(modes))
+ipcMain.handle('save-modes', (_e, modes: Mode[]) => {
+  saveModes(modes)
+  rebuildTrayMenu()
+})
