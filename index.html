@@ -213,6 +213,25 @@
   flex-shrink: 0;
 }
 @media (max-width: 640px) { .step-arrow { display: none; } }
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+.feature-card {
+  padding: 32px 28px;
+  transition: border-color 0.2s, transform 0.2s;
+}
+.feature-card:hover { border-color: var(--border-hover); transform: translateY(-3px); }
+.feature-icon { font-size: 32px; margin-bottom: 16px; }
+.feature-card h3 { font-size: 18px; font-weight: 600; margin-bottom: 10px; }
+.feature-card p { font-size: 14px; color: var(--text-secondary); line-height: 1.6; }
+.feature-card kbd {
+  background: rgba(255,255,255,0.07); border: 1px solid var(--border);
+  border-radius: 4px; padding: 2px 6px; font-size: 12px; font-family: inherit;
+}
+@media (max-width: 900px) { .feature-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 560px) { .feature-grid { grid-template-columns: 1fr; } }
   </style>
 </head>
 <body>
@@ -286,6 +305,44 @@
         <div class="step-icon">✓</div>
         <h3>Done</h3>
         <p>Your AI mode refines the text and types it exactly where your cursor was. You never leave your flow.</p>
+      </div>
+    </div>
+  </div>
+</section>
+<section class="section features">
+  <div class="container">
+    <div class="section-label reveal">Features</div>
+    <h2 class="section-title reveal">Everything you need. Nothing you don't.</h2>
+    <div class="feature-grid reveal">
+      <div class="feature-card glass">
+        <div class="feature-icon">🔒</div>
+        <h3>100% Offline</h3>
+        <p>Whisper.cpp and a local LLM run entirely on your machine with Metal GPU acceleration. Your voice never leaves your Mac.</p>
+      </div>
+      <div class="feature-card glass">
+        <div class="feature-icon">⚡</div>
+        <h3>Smart Modes</h3>
+        <p>Four built-in modes — Quick Note, Message, Agent, Dev Note — each with a tuned prompt. Fully customisable: edit, delete, or create your own.</p>
+      </div>
+      <div class="feature-card glass">
+        <div class="feature-icon">⌨️</div>
+        <h3>Auto-Type</h3>
+        <p>Text is typed directly where your cursor is via AppleScript. No manual paste. Falls back gracefully to clipboard if accessibility permission is denied.</p>
+      </div>
+      <div class="feature-card glass">
+        <div class="feature-icon">✨</div>
+        <h3>Live Streaming</h3>
+        <p>Watch your words appear token-by-token as the model processes your speech. Rendered as Markdown in real time.</p>
+      </div>
+      <div class="feature-card glass">
+        <div class="feature-icon">🎛</div>
+        <h3>Global Hotkey</h3>
+        <p>Default <kbd>⌃⌥Space</kbd> triggers from anywhere — no app switching, no clicking. Fully rebindable in Preferences.</p>
+      </div>
+      <div class="feature-card glass">
+        <div class="feature-icon">📋</div>
+        <h3>Menubar Native</h3>
+        <p>Lives in your menubar. No Dock presence. Switch modes instantly from the tray menu. Single-instance, always ready.</p>
       </div>
     </div>
   </div>
