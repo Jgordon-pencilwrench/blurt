@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Blurt Preferences</title>
+  <link rel="stylesheet" href="prefs.css">
+</head>
+<body>
+  <h1>Modes</h1>
+  <div id="modes-list"></div>
+  <button id="add-btn">+ Add Mode</button>
+
+  <div id="editor" class="hidden">
+    <h2 id="editor-title">Edit Mode</h2>
+    <label>
+      Name
+      <input id="mode-name" type="text" placeholder="e.g. Meeting Notes">
+    </label>
+    <label>
+      Prompt
+      <textarea id="mode-prompt" rows="5" placeholder="Instructions for the AI…"></textarea>
+    </label>
+    <div class="editor-actions">
+      <button id="save-btn">Save</button>
+      <button id="delete-btn" class="danger">Delete</button>
+      <button id="cancel-btn" class="secondary">Cancel</button>
+    </div>
+  </div>
+
+  <script src="prefs.js"></script>
+</body>
+</html>
