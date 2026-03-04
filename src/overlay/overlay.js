@@ -195,6 +195,10 @@ window.electronAPI.onState((state, data) => {
       el.innerHTML = marked.parse(window._rawOutput)
     }
     document.getElementById('done-status').textContent = data || ''
+  } else if (state === 'error') {
+    stopWaveform()
+    document.getElementById('error-text').textContent = data || 'An error occurred'
+    showState('error-state')
   }
 })
 
@@ -215,9 +219,15 @@ document.getElementById('cancel-btn').addEventListener('click', () => {
 document.getElementById('close-btn').addEventListener('click', () => {
   window.electronAPI.send('overlay-close')
 })
+document.getElementById('error-close-btn').addEventListener('click', () => {
+  window.electronAPI.send('overlay-close')
+})
 
 // Keyboard shortcuts
 document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape') window.electronAPI.send('overlay-cancel')
+  if (e.key === 'Escape') {
+    const errorActive = document.getElementById('error-state').classList.contains('active')
+    window.electronAPI.send(errorActive ? 'overlay-close' : 'overlay-cancel')
+  }
   if (e.key === ' ' && e.altKey) window.electronAPI.send('overlay-stop')
 })

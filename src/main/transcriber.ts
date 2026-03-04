@@ -2,6 +2,7 @@ import { execFile } from 'child_process'
 import { readFileSync, unlinkSync } from 'fs'
 import path from 'path'
 import { app } from 'electron'
+import { log } from './logger'
 
 function getWhisperBin(): string {
   if (app.isPackaged) {
@@ -23,8 +24,12 @@ export function transcribe(wavPath: string): Promise<string> {
     const model = getModelPath()
     const args = ['-m', model, '-f', wavPath, '--output-txt', '--no-timestamps', '-np']
 
+    log.info(`transcribe: ${bin} -m ${model} -f ${wavPath}`)
     execFile(bin, args, { timeout: 30000 }, (err) => {
-      if (err) return reject(err)
+      if (err) {
+        log.error('whisper-cli failed', err)
+        return reject(err)
+      }
       const txtPath = wavPath + '.txt'
       try {
         const text = readFileSync(txtPath, 'utf-8').trim()

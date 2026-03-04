@@ -6,6 +6,7 @@ import { getFrontmostApp, typeIntoApp } from './typer'
 import { showOverlay, hideOverlay, sendToOverlay, setOverlayHeight } from './overlay-window'
 import { loadModes } from './modes'
 import { getActiveModeId } from './tray'
+import { log } from './logger'
 
 const recorder = new Recorder()
 let frontmostApp: string | null = null
@@ -79,10 +80,17 @@ async function stopRecording() {
     } else {
       sendToOverlay('overlay-state', 'done', 'Copied to clipboard \u2713 \u2014 press \u2318V to paste')
     }
+    log.info(`Pipeline complete — ${canType && frontmostApp ? 'typed into ' + frontmostApp : 'copied to clipboard'}`)
 
   } catch (err) {
-    console.error('Pipeline error:', err)
-    hideOverlay()
+    const message = err instanceof Error ? err.message : String(err)
+    log.error('Pipeline error', err instanceof Error ? err : new Error(message))
+    sendToOverlay('overlay-state', 'error', message)
+    const errorTimer = setTimeout(() => hideOverlay(), 4000)
+    ipcMain.once('overlay-close', () => {
+      clearTimeout(errorTimer)
+      hideOverlay()
+    })
   } finally {
     isRunning = false
     ipcMain.removeAllListeners('overlay-pause')

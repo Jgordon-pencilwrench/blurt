@@ -6,6 +6,7 @@ import fs from 'fs'
 import https from 'https'
 import { loadSettings } from './settings'
 import { getModelById, getDefaultModel, type ModelOption, type ChatTemplate } from './model-catalog'
+import { log } from './logger'
 
 const MODELS_DIR = path.join(os.homedir(), '.config', 'blurt', 'models')
 
@@ -111,6 +112,7 @@ export async function* summarize(rawText: string, systemPrompt: string): AsyncGe
 
   const prompt = formatPrompt(model.chatTemplate, systemPrompt, rawText)
 
+  log.info(`summarize: ${getLlamaBinaryPath()} -m ${modelPath}`)
   const child = spawn(getLlamaBinaryPath(), [
     '-m', modelPath,
     '-p', prompt,
@@ -128,10 +130,15 @@ export async function* summarize(rawText: string, systemPrompt: string): AsyncGe
     errOutput += chunk.toString()
   })
 
-  child.on('error', (err) => reject(err))
+  child.on('error', (err) => {
+    log.error('llama-completion spawn error', err)
+    reject(err)
+  })
   child.on('close', (code) => {
     if (code !== 0 && code !== null) {
-      reject(new Error(`llama-completion exited with code ${code}: ${errOutput.slice(-500)}`))
+      const msg = `llama-completion exited with code ${code}: ${errOutput.slice(-500)}`
+      log.error(msg)
+      reject(new Error(msg))
     } else {
       resolve()
     }
