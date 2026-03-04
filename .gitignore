@@ -5,3 +5,4 @@ bin/whisper-cli
 bin/ggml-base.en.bin
 *.wav
 *.txt
+.worktrees/
