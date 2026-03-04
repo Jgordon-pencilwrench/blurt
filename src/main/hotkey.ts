@@ -1,6 +1,6 @@
 import { globalShortcut } from 'electron'
 
-const DEFAULT_HOTKEY = 'CommandOrControl+Shift+Space'
+const DEFAULT_HOTKEY = 'Control+Alt+Space'
 
 export function registerHotkey(onTrigger: () => void): void {
   const registered = globalShortcut.register(DEFAULT_HOTKEY, onTrigger)
