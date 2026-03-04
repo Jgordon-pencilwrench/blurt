@@ -154,6 +154,9 @@ function setRecordingVisual(paused) {
   }
 }
 
+// Pending rAF handle for batched markdown re-renders
+let _renderFrame = null
+
 // IPC from main process
 window.electronAPI.onState((state, data) => {
   if (state === 'recording') {
@@ -169,13 +172,28 @@ window.electronAPI.onState((state, data) => {
     showState('processing-state')
   } else if (state === 'streaming') {
     window._rawOutput = ''
+    if (_renderFrame) { cancelAnimationFrame(_renderFrame); _renderFrame = null }
     document.getElementById('output-text').innerHTML = ''
     showState('streaming-state')
   } else if (state === 'token') {
     window._rawOutput = (window._rawOutput || '') + data
-    // Re-render full markdown on each token so formatting is always correct
-    document.getElementById('output-text').innerHTML = marked.parse(window._rawOutput)
+    // Batch re-renders to one per animation frame — avoids O(n²) work on long output
+    if (!_renderFrame) {
+      _renderFrame = requestAnimationFrame(() => {
+        const el = document.getElementById('output-text')
+        el.innerHTML = marked.parse(window._rawOutput)
+        el.scrollTop = el.scrollHeight
+        _renderFrame = null
+      })
+    }
   } else if (state === 'done') {
+    // Flush any pending render immediately so final output is complete
+    if (_renderFrame) {
+      cancelAnimationFrame(_renderFrame)
+      _renderFrame = null
+      const el = document.getElementById('output-text')
+      el.innerHTML = marked.parse(window._rawOutput)
+    }
     document.getElementById('done-status').textContent = data || ''
   }
 })
