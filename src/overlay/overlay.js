@@ -54,10 +54,13 @@ window.electronAPI.onState((state, data) => {
     document.getElementById('status-text').textContent = data || 'Transcribing...'
     showState('processing-state')
   } else if (state === 'streaming') {
-    document.getElementById('output-text').textContent = ''
+    window._rawOutput = ''
+    document.getElementById('output-text').innerHTML = ''
     showState('streaming-state')
   } else if (state === 'token') {
-    document.getElementById('output-text').textContent += data
+    window._rawOutput = (window._rawOutput || '') + data
+    // Re-render full markdown on each token so formatting is always correct
+    document.getElementById('output-text').innerHTML = marked.parse(window._rawOutput)
   } else if (state === 'done') {
     document.getElementById('done-status').textContent = data || ''
   }

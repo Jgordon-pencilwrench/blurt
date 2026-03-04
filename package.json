@@ -17,5 +17,8 @@
     "ts-node": "^10.9.0",
     "typescript": "^5.4.0",
     "vitest": "^2.0.0"
+  },
+  "dependencies": {
+    "marked": "^17.0.3"
   }
 }
