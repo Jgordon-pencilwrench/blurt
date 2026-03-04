@@ -3,7 +3,7 @@ import { Recorder } from './recorder'
 import { transcribe } from './transcriber'
 import { summarize } from './summarizer'
 import { getFrontmostApp, typeIntoApp } from './typer'
-import { showOverlay, hideOverlay, sendToOverlay } from './overlay-window'
+import { showOverlay, hideOverlay, sendToOverlay, setOverlayHeight } from './overlay-window'
 import { loadModes } from './modes'
 import { getActiveModeId } from './tray'
 
@@ -45,6 +45,7 @@ async function stopRecording() {
     const activeMode = modes.find(m => m.id === getActiveModeId()) ?? modes[0]
 
     sendToOverlay('overlay-state', 'processing', 'Summarising...')
+    setOverlayHeight(300)
     sendToOverlay('overlay-state', 'streaming')
 
     let fullText = ''

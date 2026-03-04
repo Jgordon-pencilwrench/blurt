@@ -1,10 +1,13 @@
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
+html, body { height: 100%; }
+
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
   background: transparent;
   overflow: hidden;
   border-radius: 16px;
+  height: 100%;
 }
 
 #app {
@@ -14,15 +17,14 @@ body {
   border-radius: 16px;
   border: 1px solid rgba(0,0,0,0.08);
   padding: 20px;
-  min-height: 120px;
+  height: 100%;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
   box-shadow: 0 8px 32px rgba(0,0,0,0.18);
 }
 
 .state { display: none; }
-.state.active { display: flex; flex-direction: column; gap: 16px; }
+.state.active { display: flex; flex-direction: column; gap: 12px; flex: 1; min-height: 0; }
 
 #waveform { width: 100%; height: 60px; }
 
@@ -80,9 +82,9 @@ kbd {
   font-size: 14px;
   line-height: 1.5;
   color: #1a1a1a;
-  max-height: 200px;
   overflow-y: auto;
   flex: 1;
+  min-height: 0;
 }
 
 #output-text p { margin: 0 0 6px; }

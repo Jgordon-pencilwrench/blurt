@@ -39,6 +39,12 @@ export function showOverlay(): BrowserWindow {
 
 export function hideOverlay() {
   overlayWin?.hide()
+  // Reset to compact height for next recording session
+  overlayWin?.setSize(520, 140)
+}
+
+export function setOverlayHeight(height: number) {
+  overlayWin?.setSize(520, height)
 }
 
 export function sendToOverlay(channel: string, ...args: any[]) {
