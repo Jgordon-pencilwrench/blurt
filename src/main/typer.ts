@@ -10,18 +10,15 @@ export function typeIntoApp(text: string, appName: string): void {
   // Write to clipboard first (reliable fallback)
   clipboard.writeText(text)
 
-  // Escape text for AppleScript string literal
-  const escaped = text.replace(/\\/g, '\\\\').replace(/"/g, '\\"')
-
-  // Activate by process name (works for apps like "sublime_text" where the
-  // bundle display name differs from the process name)
+  // Activate by process name then paste from clipboard (preserves newlines,
+  // unicode, bullet points — anything keystroke would mangle)
   const script = [
     `tell application "System Events"`,
     `  set frontmost of first process whose name is "${appName}" to true`,
     `end tell`,
     `delay 0.15`,
     `tell application "System Events"`,
-    `  keystroke "${escaped}"`,
+    `  keystroke "v" using command down`,
     `end tell`,
   ].join('\n')
 

@@ -1,4 +1,4 @@
-import { ipcMain } from 'electron'
+import { ipcMain, systemPreferences, clipboard } from 'electron'
 import { Recorder } from './recorder'
 import { transcribe } from './transcriber'
 import { summarize } from './summarizer'
@@ -53,7 +53,14 @@ async function stopRecording() {
       sendToOverlay('overlay-state', 'token', token)
     }
 
-    if (frontmostApp) typeIntoApp(fullText, frontmostApp)
+    clipboard.writeText(fullText)
+    const canType = systemPreferences.isTrustedAccessibilityClient(false)
+    if (frontmostApp && canType) {
+      typeIntoApp(fullText, frontmostApp)
+      sendToOverlay('overlay-state', 'done', 'Typed ✓')
+    } else {
+      sendToOverlay('overlay-state', 'done', 'Copied to clipboard ✓ — press ⌘V to paste')
+    }
 
   } catch (err) {
     console.error('Pipeline error:', err)

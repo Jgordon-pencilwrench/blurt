@@ -58,6 +58,8 @@ window.electronAPI.onState((state, data) => {
     showState('streaming-state')
   } else if (state === 'token') {
     document.getElementById('output-text').textContent += data
+  } else if (state === 'done') {
+    document.getElementById('done-status').textContent = data || ''
   }
 })
 

@@ -4,7 +4,16 @@
       "Bash(ls:*)",
       "Bash(git:*)",
       "Bash(cmake:*)",
-      "Bash(yarn build:*)"
+      "Bash(yarn build:*)",
+      "Bash(timeout 5 ./node_modules/.bin/electron .:*)",
+      "Bash(gtimeout 5:*)",
+      "Bash(python3:*)",
+      "Bash(ollama list:*)",
+      "Bash(curl:*)",
+      "Bash(pgrep:*)",
+      "Bash(mdfind:*)",
+      "Bash(brew services:*)",
+      "Bash(/opt/homebrew/bin/ollama list:*)"
     ]
   }
 }
