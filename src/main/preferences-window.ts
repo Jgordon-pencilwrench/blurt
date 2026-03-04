@@ -11,8 +11,10 @@ export function openPreferences() {
   }
 
   prefsWin = new BrowserWindow({
-    width: 600,
-    height: 500,
+    width: 680,
+    height: 460,
+    minWidth: 580,
+    minHeight: 380,
     title: 'Blurt Preferences',
     webPreferences: {
       nodeIntegration: false,

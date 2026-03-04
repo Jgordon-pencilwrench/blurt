@@ -7,24 +7,33 @@
 </head>
 <body>
   <div id="app">
+    <div class="drag-handle">
+      <span class="drag-dots">⠿</span>
+      <span class="app-label">Blurt</span>
+      <span class="drag-dots">⠿</span>
+    </div>
+
     <div id="recording-state" class="state active">
+      <div class="recording-header">
+        <span class="rec-dot"></span>
+        <span class="rec-label">Listening…</span>
+      </div>
       <canvas id="waveform"></canvas>
       <div class="controls">
-        <span class="logo">▲</span>
-        <div class="buttons">
-          <button id="stop-btn">Stop <kbd>⌥Space</kbd></button>
-          <button id="cancel-btn" class="secondary">Cancel <kbd>esc</kbd></button>
-        </div>
+        <button id="stop-btn" class="primary-btn">Stop <kbd>⌥Space</kbd></button>
+        <button id="cancel-btn" class="ghost-btn">Cancel <kbd>esc</kbd></button>
       </div>
     </div>
+
     <div id="processing-state" class="state">
-      <div id="status-text" class="status-text">Transcribing...</div>
+      <div id="status-text" class="status-text">Transcribing…</div>
     </div>
+
     <div id="streaming-state" class="state">
       <div id="output-text"></div>
       <div class="controls">
         <span id="done-status" class="done-status"></span>
-        <button id="close-btn" class="secondary">Close <kbd>esc</kbd></button>
+        <button id="close-btn" class="ghost-btn">Close <kbd>esc</kbd></button>
       </div>
     </div>
   </div>

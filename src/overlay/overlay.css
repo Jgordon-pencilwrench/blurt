@@ -6,90 +6,205 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
   background: transparent;
   overflow: hidden;
-  border-radius: 16px;
+  border-radius: 14px;
   height: 100%;
 }
 
+/* ── Shell ─────────────────────────────────────────────── */
 #app {
-  background: rgba(255,255,255,0.85);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-radius: 16px;
-  border: 1px solid rgba(0,0,0,0.08);
-  padding: 20px;
+  background: rgba(18, 16, 12, 0.91);
+  backdrop-filter: blur(28px) saturate(180%);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  border-radius: 14px;
+  border: 1px solid rgba(255, 245, 220, 0.10);
   height: 100%;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+  box-shadow:
+    0 0 0 0.5px rgba(0,0,0,0.6),
+    0 12px 40px rgba(0,0,0,0.5),
+    0 2px 8px rgba(0,0,0,0.3);
+  overflow: hidden;
 }
 
-.state { display: none; }
-.state.active { display: flex; flex-direction: column; gap: 12px; flex: 1; min-height: 0; }
-
-#waveform { width: 100%; height: 60px; }
-
-.controls {
+/* ── Drag handle ────────────────────────────────────────── */
+.drag-handle {
+  -webkit-app-region: drag;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  padding: 6px 14px 4px;
+  cursor: grab;
+  flex-shrink: 0;
 }
 
-.logo { font-size: 18px; color: #555; }
+.drag-handle:active { cursor: grabbing; }
 
-.done-status { font-size: 12px; color: #555; flex: 1; }
-
-.buttons { display: flex; gap: 8px; align-items: center; }
-
-button {
-  background: #000;
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  padding: 6px 14px;
-  font-size: 13px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-button.secondary {
-  background: rgba(0,0,0,0.08);
-  color: #333;
-}
-
-kbd {
-  background: rgba(255,255,255,0.3);
-  border-radius: 4px;
-  padding: 1px 5px;
+.drag-dots {
   font-size: 11px;
+  color: rgba(255,245,220,0.18);
+  letter-spacing: 1px;
 }
 
-.status-text {
-  color: #666;
-  font-size: 14px;
-  text-align: center;
-  padding: 20px;
-  animation: pulse 1.4s ease-in-out infinite;
+.app-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255,245,220,0.25);
 }
 
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.4; }
-}
-
-#output-text {
-  font-size: 14px;
-  line-height: 1.5;
-  color: #1a1a1a;
-  overflow-y: auto;
+/* ── States ─────────────────────────────────────────────── */
+.state { display: none; padding: 0 16px 16px; }
+.state.active {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
   flex: 1;
   min-height: 0;
 }
 
+/* ── Recording state ─────────────────────────────────────── */
+.recording-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.rec-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #f0a500;
+  animation: rec-pulse 1.2s ease-in-out infinite;
+  flex-shrink: 0;
+}
+
+@keyframes rec-pulse {
+  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(240,165,0,0.4); }
+  50% { opacity: 0.7; box-shadow: 0 0 0 5px rgba(240,165,0,0); }
+}
+
+.rec-label {
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  color: rgba(240,165,0,0.85);
+  text-transform: uppercase;
+}
+
+#waveform {
+  width: 100%;
+  height: 48px;
+  border-radius: 6px;
+}
+
+/* ── Processing state ────────────────────────────────────── */
+.status-text {
+  color: rgba(255,245,220,0.55);
+  font-size: 13px;
+  text-align: center;
+  padding: 24px 0 20px;
+  letter-spacing: 0.04em;
+  animation: fade-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes fade-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+
+/* ── Streaming state ─────────────────────────────────────── */
+#output-text {
+  font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
+  font-size: 12.5px;
+  line-height: 1.65;
+  color: rgba(255, 248, 235, 0.92);
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+  padding-right: 4px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,245,220,0.15) transparent;
+}
+
+#output-text::-webkit-scrollbar { width: 4px; }
+#output-text::-webkit-scrollbar-track { background: transparent; }
+#output-text::-webkit-scrollbar-thumb { background: rgba(255,245,220,0.15); border-radius: 2px; }
+
 #output-text p { margin: 0 0 6px; }
 #output-text p:last-child { margin-bottom: 0; }
-#output-text ul, #output-text ol { margin: 0 0 6px; padding-left: 18px; }
-#output-text li { margin-bottom: 2px; }
-#output-text strong { font-weight: 600; }
-#output-text code { background: rgba(0,0,0,0.06); border-radius: 3px; padding: 1px 4px; font-size: 12px; }
+#output-text ul, #output-text ol { margin: 0 0 6px; padding-left: 16px; }
+#output-text li { margin-bottom: 3px; }
+#output-text strong { font-weight: 700; color: rgba(255,248,235,1); }
+#output-text code {
+  background: rgba(255,245,220,0.08);
+  border-radius: 3px;
+  padding: 1px 4px;
+  font-size: 11.5px;
+}
+
+.done-status {
+  font-size: 11px;
+  color: rgba(240,165,0,0.7);
+  flex: 1;
+  letter-spacing: 0.03em;
+}
+
+/* ── Controls ─────────────────────────────────────────────── */
+.controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-shrink: 0;
+  -webkit-app-region: no-drag;
+}
+
+.primary-btn {
+  background: rgba(255,245,220,0.92);
+  color: #1a1710;
+  border: none;
+  border-radius: 7px;
+  padding: 6px 13px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: background 0.15s;
+  -webkit-app-region: no-drag;
+}
+
+.primary-btn:hover { background: #fff; }
+
+.ghost-btn {
+  background: rgba(255,245,220,0.07);
+  color: rgba(255,245,220,0.6);
+  border: 1px solid rgba(255,245,220,0.10);
+  border-radius: 7px;
+  padding: 6px 13px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s;
+  -webkit-app-region: no-drag;
+}
+
+.ghost-btn:hover {
+  background: rgba(255,245,220,0.12);
+  color: rgba(255,245,220,0.85);
+}
+
+kbd {
+  font-family: inherit;
+  font-size: 10px;
+  opacity: 0.55;
+  background: rgba(255,245,220,0.08);
+  border-radius: 3px;
+  padding: 1px 4px;
+}

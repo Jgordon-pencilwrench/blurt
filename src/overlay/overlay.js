@@ -34,7 +34,8 @@ function drawWaveform() {
   let x = 0
   for (let i = 0; i < data.length; i++) {
     const barHeight = (data[i] / 255) * canvas.height
-    ctx.fillStyle = `rgba(0,0,0,${0.3 + (data[i] / 255) * 0.7})`
+    const intensity = data[i] / 255
+    ctx.fillStyle = `rgba(240,165,0,${0.25 + intensity * 0.75})`
     ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight)
     x += barWidth + 1
   }

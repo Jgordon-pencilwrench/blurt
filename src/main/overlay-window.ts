@@ -20,7 +20,7 @@ export function showOverlay(): BrowserWindow {
     transparent: true,
     alwaysOnTop: true,
     resizable: false,
-    movable: false,
+    movable: true,
     focusable: false,
     skipTaskbar: true,
     vibrancy: 'under-window',

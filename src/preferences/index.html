@@ -6,25 +6,39 @@
   <link rel="stylesheet" href="prefs.css">
 </head>
 <body>
-  <h1>Modes</h1>
-  <div id="modes-list"></div>
-  <button id="add-btn">+ Add Mode</button>
+  <div id="layout">
+    <aside id="sidebar">
+      <div class="sidebar-header">
+        <span class="sidebar-title">Modes</span>
+        <button id="add-btn" title="New mode">+</button>
+      </div>
+      <div id="modes-list"></div>
+    </aside>
 
-  <div id="editor" class="hidden">
-    <h2 id="editor-title">Edit Mode</h2>
-    <label>
-      Name
-      <input id="mode-name" type="text" placeholder="e.g. Meeting Notes">
-    </label>
-    <label>
-      Prompt
-      <textarea id="mode-prompt" rows="5" placeholder="Instructions for the AI…"></textarea>
-    </label>
-    <div class="editor-actions">
-      <button id="save-btn">Save</button>
-      <button id="delete-btn" class="danger">Delete</button>
-      <button id="cancel-btn" class="secondary">Cancel</button>
-    </div>
+    <main id="editor-panel">
+      <div id="empty-state">
+        <div class="empty-icon">◈</div>
+        <p>Select a mode to edit</p>
+      </div>
+      <div id="editor" class="hidden">
+        <div class="editor-header">
+          <h2 id="editor-title">Edit Mode</h2>
+          <button id="delete-btn" class="danger-btn" title="Delete mode">Delete</button>
+        </div>
+        <div class="field">
+          <label for="mode-name">Name</label>
+          <input id="mode-name" type="text" placeholder="e.g. Meeting Notes" autocomplete="off">
+        </div>
+        <div class="field field-grow">
+          <label for="mode-prompt">Prompt</label>
+          <textarea id="mode-prompt" placeholder="Instructions sent to the AI before your transcription…"></textarea>
+        </div>
+        <div class="editor-actions">
+          <button id="cancel-btn" class="ghost-btn">Discard</button>
+          <button id="save-btn" class="save-btn">Save</button>
+        </div>
+      </div>
+    </main>
   </div>
 
   <script src="prefs.js"></script>

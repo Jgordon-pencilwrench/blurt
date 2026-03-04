@@ -1,73 +1,97 @@
 let modes = []
-let editingIndex = -1
+let selectedIndex = -1
+let isDirty = false
 
-const modesList = document.getElementById('modes-list')
-const editor = document.getElementById('editor')
+const modesList   = document.getElementById('modes-list')
+const editor      = document.getElementById('editor')
+const emptyState  = document.getElementById('empty-state')
 const editorTitle = document.getElementById('editor-title')
-const modeName = document.getElementById('mode-name')
-const modePrompt = document.getElementById('mode-prompt')
+const modeName    = document.getElementById('mode-name')
+const modePrompt  = document.getElementById('mode-prompt')
+const deleteBtn   = document.getElementById('delete-btn')
 
 async function load() {
   modes = await window.prefsAPI.getModes()
-  render()
+  renderList()
 }
 
-function render() {
+function renderList() {
   modesList.innerHTML = ''
   modes.forEach((mode, i) => {
-    const row = document.createElement('div')
-    row.className = 'mode-row'
-    row.innerHTML = `
-      <div>
-        <div class="mode-row-name">${mode.name}</div>
-        <div class="mode-row-prompt">${mode.prompt}</div>
-      </div>
-      <span class="mode-row-edit">Edit →</span>
+    const item = document.createElement('div')
+    item.className = 'mode-item' + (i === selectedIndex ? ' selected' : '')
+    item.innerHTML = `
+      <div class="mode-item-name">${mode.name}</div>
+      <div class="mode-item-preview">${mode.prompt}</div>
     `
-    row.addEventListener('click', () => openEditor(i))
-    modesList.appendChild(row)
+    item.addEventListener('click', () => selectMode(i))
+    modesList.appendChild(item)
   })
 }
 
-function openEditor(index) {
-  editingIndex = index
-  const isNew = index === -1
-  editorTitle.textContent = isNew ? 'New Mode' : 'Edit Mode'
-  modeName.value = isNew ? '' : modes[index].name
-  modePrompt.value = isNew ? '' : modes[index].prompt
-  document.getElementById('delete-btn').style.display = isNew ? 'none' : ''
-  editor.classList.remove('hidden')
+function selectMode(index) {
+  selectedIndex = index
+  const mode = modes[index]
+  editorTitle.textContent = 'Edit Mode'
+  modeName.value = mode.name
+  modePrompt.value = mode.prompt
+  deleteBtn.style.display = ''
+  isDirty = false
+  showEditor()
+  renderList()
+}
+
+function newMode() {
+  selectedIndex = -1
+  editorTitle.textContent = 'New Mode'
+  modeName.value = ''
+  modePrompt.value = ''
+  deleteBtn.style.display = 'none'
+  isDirty = false
+  showEditor()
+  renderList()
   modeName.focus()
 }
 
-document.getElementById('add-btn').addEventListener('click', () => openEditor(-1))
+function showEditor() {
+  editor.classList.remove('hidden')
+  emptyState.classList.add('hidden')
+}
+
+function hideEditor() {
+  editor.classList.add('hidden')
+  emptyState.classList.remove('hidden')
+  selectedIndex = -1
+  renderList()
+}
+
+document.getElementById('add-btn').addEventListener('click', newMode)
 
 document.getElementById('save-btn').addEventListener('click', async () => {
-  const name = modeName.value.trim()
+  const name   = modeName.value.trim()
   const prompt = modePrompt.value.trim()
-  if (!name || !prompt) return
-
-  if (editingIndex === -1) {
-    modes.push({ id: name.toLowerCase().replace(/\s+/g, '-'), name, prompt, hotkey: null })
-  } else {
-    modes[editingIndex] = { ...modes[editingIndex], name, prompt }
+  if (!name || !prompt) {
+    modeName.focus()
+    return
   }
-
+  if (selectedIndex === -1) {
+    modes.push({ id: name.toLowerCase().replace(/\s+/g, '-'), name, prompt, hotkey: null })
+    selectedIndex = modes.length - 1
+  } else {
+    modes[selectedIndex] = { ...modes[selectedIndex], name, prompt }
+  }
   await window.prefsAPI.saveModes(modes)
-  editor.classList.add('hidden')
-  render()
+  isDirty = false
+  renderList()
 })
 
 document.getElementById('delete-btn').addEventListener('click', async () => {
-  if (editingIndex === -1) return
-  modes.splice(editingIndex, 1)
+  if (selectedIndex === -1) return
+  modes.splice(selectedIndex, 1)
   await window.prefsAPI.saveModes(modes)
-  editor.classList.add('hidden')
-  render()
+  hideEditor()
 })
 
-document.getElementById('cancel-btn').addEventListener('click', () => {
-  editor.classList.add('hidden')
-})
+document.getElementById('cancel-btn').addEventListener('click', hideEditor)
 
 load()
