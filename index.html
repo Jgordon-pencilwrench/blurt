@@ -170,6 +170,49 @@
   .hero-inner { grid-template-columns: 1fr; }
   .overlay-card { transform: none; }
 }
+.section { padding: 100px 0; }
+.section-label {
+  font-size: 12px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--accent); margin-bottom: 16px;
+}
+.section-title {
+  font-size: clamp(28px, 4vw, 44px); font-weight: 700;
+  letter-spacing: -0.02em; margin-bottom: 60px;
+  max-width: 600px;
+}
+.steps {
+  display: flex; align-items: flex-start; gap: 20px;
+  flex-wrap: wrap;
+}
+.step {
+  flex: 1; min-width: 220px;
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 32px 28px;
+  transition: border-color 0.2s, background 0.2s;
+}
+.step:hover { border-color: var(--border-hover); background: var(--bg-card-hover); }
+.step-num {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: var(--accent-dim); color: var(--accent);
+  font-weight: 700; font-size: 14px;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 16px;
+}
+.step-key kbd {
+  display: inline-block; background: rgba(255,255,255,0.07);
+  border: 1px solid var(--border); border-radius: 6px;
+  padding: 4px 10px; font-size: 13px; font-family: inherit;
+  margin-bottom: 16px; color: var(--text-primary);
+}
+.step-icon { font-size: 28px; margin-bottom: 12px; }
+.step h3 { font-size: 18px; font-weight: 600; margin-bottom: 10px; }
+.step p { font-size: 15px; color: var(--text-secondary); }
+.step-arrow {
+  font-size: 24px; color: var(--text-tertiary);
+  align-self: center; padding-top: 20px;
+  flex-shrink: 0;
+}
+@media (max-width: 640px) { .step-arrow { display: none; } }
   </style>
 </head>
 <body>
@@ -218,6 +261,34 @@
     </div>
   </div>
   <div class="hero-glow"></div>
+</section>
+<section class="section how-it-works">
+  <div class="container">
+    <div class="section-label reveal">How it works</div>
+    <h2 class="section-title reveal">Three seconds from thought to text.</h2>
+    <div class="steps reveal">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-key"><kbd>⌃⌥Space</kbd></div>
+        <h3>Press</h3>
+        <p>Hit your global hotkey from anywhere. The overlay appears instantly over whatever you're working in.</p>
+      </div>
+      <div class="step-arrow">→</div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-icon">🎙</div>
+        <h3>Speak</h3>
+        <p>Talk naturally. Whisper transcribes on-device. No lag, no upload, no waiting for the cloud.</p>
+      </div>
+      <div class="step-arrow">→</div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-icon">✓</div>
+        <h3>Done</h3>
+        <p>Your AI mode refines the text and types it exactly where your cursor was. You never leave your flow.</p>
+      </div>
+    </div>
+  </div>
 </section>
   <script>
     // Scroll reveal
