@@ -67,6 +67,109 @@
   transition: opacity 0.2s;
 }
 .nav-cta:hover { opacity: 0.85; }
+.hero {
+  padding: 160px 0 100px;
+  position: relative;
+  overflow: hidden;
+}
+.hero-inner {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 64px;
+  align-items: center;
+}
+.hero-badge {
+  display: inline-flex; align-items: center;
+  background: var(--accent-dim); color: var(--accent);
+  border: 1px solid var(--accent-glow);
+  padding: 5px 14px; border-radius: 20px;
+  font-size: 12px; font-weight: 500; letter-spacing: 0.03em;
+  margin-bottom: 24px;
+}
+.hero-headline {
+  font-size: clamp(40px, 5vw, 60px);
+  font-weight: 700; line-height: 1.1;
+  letter-spacing: -0.03em;
+  margin-bottom: 20px;
+}
+.hero-sub {
+  font-size: 18px; color: var(--text-secondary);
+  max-width: 420px; margin-bottom: 36px;
+}
+.hero-actions { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
+.btn-primary {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--accent); color: #0d0d0f;
+  padding: 12px 24px; border-radius: 24px;
+  font-weight: 600; font-size: 15px; text-decoration: none;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 0 30px var(--accent-glow);
+}
+.btn-primary:hover { transform: translateY(-1px); box-shadow: 0 0 40px var(--accent-glow); }
+.hero-meta { font-size: 13px; color: var(--text-tertiary); }
+.hero-visual { display: flex; justify-content: center; }
+.overlay-mockup { perspective: 800px; }
+.overlay-card {
+  width: 340px;
+  padding: 20px;
+  transform: rotateY(-8deg) rotateX(4deg);
+  transition: transform 0.5s ease;
+}
+.overlay-card:hover { transform: rotateY(0) rotateX(0); }
+.overlay-header {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 16px; font-size: 13px;
+}
+.rec-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: #ff453a;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255,69,58,0.4); }
+  50% { box-shadow: 0 0 0 5px rgba(255,69,58,0); }
+}
+.overlay-mode { font-weight: 500; flex: 1; }
+.overlay-shortcut { font-size: 11px; color: var(--text-tertiary); }
+.waveform {
+  display: flex; align-items: center; gap: 3px;
+  height: 40px; margin-bottom: 16px;
+}
+.waveform-bar {
+  width: 3px; border-radius: 2px;
+  background: var(--accent);
+  animation: wave 0.8s ease-in-out infinite;
+}
+@keyframes wave {
+  0%, 100% { transform: scaleY(0.3); opacity: 0.4; }
+  50% { transform: scaleY(1); opacity: 1; }
+}
+.overlay-output {
+  font-size: 14px; color: var(--text-secondary);
+  min-height: 60px; margin-bottom: 16px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+.overlay-footer { display: flex; gap: 8px; }
+.overlay-btn {
+  padding: 7px 16px; border-radius: 8px;
+  background: var(--accent); color: #0d0d0f;
+  border: none; font-weight: 600; font-size: 13px; cursor: pointer;
+}
+.overlay-btn-ghost {
+  background: transparent; color: var(--text-secondary);
+  border: 1px solid var(--border);
+}
+.hero-glow {
+  position: absolute; top: 20%; left: 50%; transform: translateX(-50%);
+  width: 600px; height: 400px;
+  background: radial-gradient(ellipse, rgba(167,139,250,0.12) 0%, transparent 70%);
+  pointer-events: none; z-index: -1;
+}
+@media (max-width: 768px) {
+  .hero-inner { grid-template-columns: 1fr; }
+  .overlay-card { transform: none; }
+}
   </style>
 </head>
 <body>
@@ -82,6 +185,40 @@
     <a href="#download" class="nav-cta">Download for Mac</a>
   </div>
 </nav>
+<section class="hero">
+  <div class="container hero-inner">
+    <div class="hero-text reveal">
+      <div class="hero-badge">macOS · arm64 · 100% Offline</div>
+      <h1 class="hero-headline">Your voice.<br>Instantly typed.<br>Completely private.</h1>
+      <p class="hero-sub">One hotkey. Speak. Blurt transcribes, refines, and types it — all on your Mac, never touching a server.</p>
+      <div class="hero-actions">
+        <a href="#download" id="download" class="btn-primary">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M8 1v9M4 7l4 4 4-4M2 14h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" fill="none"/></svg>
+          Download for Mac
+        </a>
+        <span class="hero-meta">Free · macOS 13+ · Apple Silicon</span>
+      </div>
+    </div>
+    <div class="hero-visual reveal" style="transition-delay:0.15s">
+      <div class="overlay-mockup">
+        <div class="overlay-card glass">
+          <div class="overlay-header">
+            <span class="rec-dot"></span>
+            <span class="overlay-mode">Quick Note</span>
+            <span class="overlay-shortcut">⌥Space to stop</span>
+          </div>
+          <div class="waveform" id="waveform"></div>
+          <div class="overlay-output" id="streamOutput"></div>
+          <div class="overlay-footer">
+            <button class="overlay-btn">Stop</button>
+            <button class="overlay-btn overlay-btn-ghost">Cancel</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="hero-glow"></div>
+</section>
   <script>
     // Scroll reveal
     const observer = new IntersectionObserver(
@@ -89,6 +226,34 @@
       { threshold: 0.1 }
     );
     document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+    // Waveform bars
+const waveform = document.getElementById('waveform');
+if (waveform) {
+  for (let i = 0; i < 28; i++) {
+    const bar = document.createElement('div');
+    bar.className = 'waveform-bar';
+    bar.style.height = `${Math.random() * 30 + 8}px`;
+    bar.style.animationDelay = `${(i * 0.05).toFixed(2)}s`;
+    bar.style.animationDuration = `${(0.6 + Math.random() * 0.6).toFixed(2)}s`;
+    waveform.appendChild(bar);
+  }
+}
+
+// Token streaming simulation
+const tokens = ['Summarised', ' key points:', '\n• ', 'Follow up', ' with design', ' team\n• ', 'Deadline', ' moved to', ' Friday\n• ', 'Need', ' final', ' approval'];
+let idx = 0;
+const out = document.getElementById('streamOutput');
+function streamNext() {
+  if (!out) return;
+  if (idx < tokens.length) {
+    out.textContent += tokens[idx++];
+    setTimeout(streamNext, 180 + Math.random() * 120);
+  } else {
+    setTimeout(() => { out.textContent = ''; idx = 0; streamNext(); }, 3000);
+  }
+}
+setTimeout(streamNext, 1200);
   </script>
 </body>
 </html>
