@@ -31,12 +31,29 @@ export function startPipeline() {
     beginRecording()
   }
 
-  ipcMain.once('overlay-stop', () => stopRecording())
-  ipcMain.once('overlay-cancel', () => cancelPipeline())
+  ipcMain.once('overlay-stop', onStop)
+  ipcMain.once('overlay-cancel', onCancel)
+  ipcMain.on('overlay-pause', onPause)
+  ipcMain.on('overlay-resume', onResume)
+}
+
+function onStop() { stopRecording() }
+function onCancel() { cancelPipeline() }
+function onPause() {
+  if (recorder.isRecording && !recorder.isPaused) {
+    recorder.pause()
+    sendToOverlay('overlay-state', 'paused')
+  }
+}
+function onResume() {
+  if (recorder.isRecording && recorder.isPaused) {
+    recorder.resume()
+    sendToOverlay('overlay-state', 'recording')
+  }
 }
 
 async function stopRecording() {
-  const wavPath = recorder.stop()
+  const wavPath = await recorder.stop()
 
   try {
     sendToOverlay('overlay-state', 'processing', 'Transcribing...')
@@ -58,9 +75,9 @@ async function stopRecording() {
     const canType = systemPreferences.isTrustedAccessibilityClient(false)
     if (frontmostApp && canType) {
       typeIntoApp(fullText, frontmostApp)
-      sendToOverlay('overlay-state', 'done', 'Typed ✓')
+      sendToOverlay('overlay-state', 'done', 'Typed \u2713')
     } else {
-      sendToOverlay('overlay-state', 'done', 'Copied to clipboard ✓ — press ⌘V to paste')
+      sendToOverlay('overlay-state', 'done', 'Copied to clipboard \u2713 \u2014 press \u2318V to paste')
     }
 
   } catch (err) {
@@ -68,14 +85,18 @@ async function stopRecording() {
     hideOverlay()
   } finally {
     isRunning = false
+    ipcMain.removeAllListeners('overlay-pause')
+    ipcMain.removeAllListeners('overlay-resume')
   }
 }
 
 function cancelPipeline() {
-  if (recorder.isRecording) recorder.stop()
+  if (recorder.isRecording) recorder.cancel()
   hideOverlay()
   isRunning = false
   ipcMain.removeAllListeners('overlay-stop')
+  ipcMain.removeAllListeners('overlay-pause')
+  ipcMain.removeAllListeners('overlay-resume')
 }
 
 ipcMain.on('overlay-close', () => {

@@ -1,7 +1,11 @@
 import { BrowserWindow, ipcMain } from 'electron'
 import path from 'path'
 import { loadModes, saveModes, Mode } from './modes'
+import { loadSettings, saveSettings } from './settings'
+import { updateHotkey } from './hotkey'
 import { rebuildTrayMenu } from './tray'
+import { MODEL_CATALOG } from './model-catalog'
+import { modelFileExists, downloadModel, deleteModel } from './summarizer'
 
 let prefsWin: BrowserWindow | null = null
 
@@ -31,4 +35,50 @@ ipcMain.handle('get-modes', () => loadModes())
 ipcMain.handle('save-modes', (_e, modes: Mode[]) => {
   saveModes(modes)
   rebuildTrayMenu()
+})
+
+ipcMain.handle('get-settings', () => loadSettings())
+ipcMain.handle('save-settings', (_e, partial: { hotkey: string }) => {
+  const ok = updateHotkey(partial.hotkey)
+  if (!ok) return { ok: false, error: 'Shortcut is already in use by another app' }
+  const current = loadSettings()
+  saveSettings({ ...current, hotkey: partial.hotkey })
+  return { ok: true }
+})
+
+ipcMain.handle('get-model-status', () => {
+  const settings = loadSettings()
+  return {
+    catalog: MODEL_CATALOG.map((m) => ({
+      ...m,
+      downloaded: modelFileExists(m),
+      active: m.id === settings.activeModel,
+    })),
+    activeModelId: settings.activeModel,
+  }
+})
+
+ipcMain.handle('download-model', async (_e, modelId: string) => {
+  const model = MODEL_CATALOG.find((m) => m.id === modelId)
+  if (!model) throw new Error(`Unknown model: ${modelId}`)
+  if (modelFileExists(model)) return true
+
+  await downloadModel(model, (percent, downloadedMB, totalMB) => {
+    prefsWin?.webContents.send('model-download-progress', { modelId, percent, downloadedMB, totalMB })
+  })
+  return true
+})
+
+ipcMain.handle('set-active-model', (_e, modelId: string) => {
+  const settings = loadSettings()
+  settings.activeModel = modelId
+  saveSettings(settings)
+  return true
+})
+
+ipcMain.handle('delete-model', (_e, modelId: string) => {
+  const model = MODEL_CATALOG.find((m) => m.id === modelId)
+  if (!model) throw new Error(`Unknown model: ${modelId}`)
+  deleteModel(model)
+  return true
 })

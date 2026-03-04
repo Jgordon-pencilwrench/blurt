@@ -16,11 +16,12 @@
     <div id="recording-state" class="state active">
       <div class="recording-header">
         <span class="rec-dot"></span>
-        <span class="rec-label">Listening…</span>
+        <span id="rec-label" class="rec-label">Listening…</span>
       </div>
       <canvas id="waveform"></canvas>
       <div class="controls">
         <button id="stop-btn" class="primary-btn">Stop <kbd>⌥Space</kbd></button>
+        <button id="pause-btn" class="ghost-btn">Pause</button>
         <button id="cancel-btn" class="ghost-btn">Cancel <kbd>esc</kbd></button>
       </div>
     </div>

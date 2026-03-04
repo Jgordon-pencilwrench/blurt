@@ -250,3 +250,196 @@ input:focus, textarea:focus {
   transition: all 0.15s;
 }
 .danger-btn:hover { background: rgba(192,57,43,0.07); }
+
+/* ── Sidebar footer ────────────────────────────────────── */
+.sidebar-footer {
+  padding: 8px;
+  border-top: 1px solid #d8d4cc;
+  flex-shrink: 0;
+}
+
+.general-nav {
+  padding: 8px 10px;
+  border-radius: 7px;
+  cursor: pointer;
+  font-size: 12px;
+  color: #9c9488;
+  transition: background 0.12s, color 0.12s;
+}
+.general-nav:hover { background: rgba(28,26,23,0.06); color: #1c1a17; }
+.general-nav.selected { background: #fff; border: 1px solid #d8d4cc; color: #1c1a17; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+
+/* ── Settings panel ────────────────────────────────────── */
+#settings-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 22px 24px 20px;
+  overflow: hidden;
+}
+#settings-panel.hidden { display: none; }
+
+.settings-header {
+  margin-bottom: 20px;
+  flex-shrink: 0;
+}
+
+/* ── Hotkey capture ────────────────────────────────────── */
+.hotkey-capture {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid #d8d4cc;
+  border-radius: 7px;
+  padding: 9px 11px;
+  background: #fff;
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  min-height: 38px;
+  font-size: 13px;
+  color: #1c1a17;
+  font-family: inherit;
+}
+
+.hotkey-capture:focus,
+.hotkey-capture.capturing {
+  outline: none;
+  border-color: #b0a898;
+  box-shadow: 0 0 0 3px rgba(176,168,152,0.15);
+}
+
+.hotkey-capture.capturing #hotkey-display { opacity: 0.4; }
+.hotkey-hint {
+  font-size: 11px;
+  color: #b0a898;
+}
+.hotkey-capture.capturing .hotkey-hint { display: none; }
+.hotkey-capture.listening .hotkey-hint { display: block; }
+
+.field-error {
+  font-size: 11px;
+  color: #c0392b;
+  min-height: 16px;
+  margin-top: 2px;
+}
+
+/* ── Model panel ──────────────────────────────────────── */
+#model-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 22px 24px 20px;
+  overflow-y: auto;
+}
+#model-panel.hidden { display: none; }
+
+.model-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid #e5e1db;
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin-bottom: 8px;
+  background: #fff;
+  transition: border-color 0.15s;
+}
+.model-row.active {
+  border-color: #d4a020;
+  box-shadow: 0 0 0 1px rgba(212,160,32,0.15);
+}
+
+.model-row-info { flex: 1; }
+.model-row-name {
+  font-weight: 600;
+  font-size: 13px;
+  color: #1c1a17;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.model-row-meta {
+  font-size: 11px;
+  color: #9c9488;
+  margin-top: 2px;
+}
+.model-row-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: 12px;
+}
+
+.badge-active {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  background: #27ae60;
+  color: #fff;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.badge-size {
+  font-size: 10px;
+  font-weight: 600;
+  background: #eae7e1;
+  padding: 2px 6px;
+  border-radius: 4px;
+  color: #7a7368;
+}
+
+.model-btn {
+  font-family: inherit;
+  font-size: 11px;
+  cursor: pointer;
+  border-radius: 5px;
+  padding: 5px 10px;
+  font-weight: 600;
+  transition: all 0.15s;
+  border: none;
+}
+.model-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.model-btn-activate {
+  background: #1c1a17;
+  color: #f5f3ef;
+}
+.model-btn-activate:hover:not(:disabled) { background: #3a3730; }
+
+.model-btn-download {
+  background: #d4a020;
+  color: #fff;
+}
+.model-btn-download:hover:not(:disabled) { background: #b8890e; }
+
+.model-btn-delete {
+  background: transparent;
+  color: #c0392b;
+  border: 1px solid rgba(192,57,43,0.2);
+}
+.model-btn-delete:hover:not(:disabled) { background: rgba(192,57,43,0.06); }
+
+.model-progress {
+  width: 100%;
+  margin-top: 6px;
+}
+.model-progress-bar {
+  height: 4px;
+  background: #e5e1db;
+  border-radius: 2px;
+  overflow: hidden;
+}
+.model-progress-fill {
+  height: 100%;
+  background: #d4a020;
+  border-radius: 2px;
+  width: 0%;
+  transition: width 0.3s ease;
+}
+.model-progress-text {
+  font-size: 10px;
+  color: #9c9488;
+  margin-top: 3px;
+}

@@ -1,7 +1,12 @@
 node_modules/
+package-lock.json
 dist/
 dist-app/
 bin/whisper-cli
 bin/ggml-base.en.bin
+bin/llama-cli
+bin/llama-completion
+bin/*.gguf
 *.wav
 *.txt
+.worktrees/

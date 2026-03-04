@@ -1,37 +1,54 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { ChildProcess } from 'child_process'
 
-const mockSpawn = vi.fn()
-vi.mock('child_process', () => ({ spawn: mockSpawn }))
+const mockSendToOverlay = vi.fn()
+vi.mock('./overlay-window', () => ({
+  sendToOverlay: mockSendToOverlay,
+}))
+
+let ipcOnceCallback: Function | null = null
+vi.mock('electron', () => ({
+  ipcMain: {
+    once: (_channel: string, cb: Function) => { ipcOnceCallback = cb },
+    removeAllListeners: vi.fn(),
+  },
+}))
+
+import fs from 'fs'
+vi.spyOn(fs, 'writeFileSync').mockImplementation(() => {})
 
 describe('Recorder', () => {
-  beforeEach(() => vi.clearAllMocks())
+  beforeEach(() => {
+    vi.clearAllMocks()
+    ipcOnceCallback = null
+  })
 
-  it('spawns sox with correct args when recording starts', async () => {
-    const mockProcess = { kill: vi.fn(), on: vi.fn() } as unknown as ChildProcess
-    mockSpawn.mockReturnValue(mockProcess)
-
+  it('sends start command to overlay and returns wav path', async () => {
     const { Recorder } = await import('./recorder')
     const recorder = new Recorder()
     const outPath = recorder.start()
 
-    expect(mockSpawn).toHaveBeenCalledWith(
-      'sox',
-      expect.arrayContaining(['-t', 'coreaudio', 'default', expect.stringContaining('.wav')]),
-      expect.any(Object)
-    )
+    expect(mockSendToOverlay).toHaveBeenCalledWith('recording-command', 'start')
     expect(outPath).toMatch(/\.wav$/)
+    expect(recorder.isRecording).toBe(true)
   })
 
-  it('kills the sox process when stop is called', async () => {
-    const mockProcess = { kill: vi.fn(), on: vi.fn() } as unknown as ChildProcess
-    mockSpawn.mockReturnValue(mockProcess)
+  it('sends stop command and writes received WAV data to file', async () => {
+    const fakeWav = new Uint8Array([1, 2, 3, 4])
 
     const { Recorder } = await import('./recorder')
     const recorder = new Recorder()
     recorder.start()
-    recorder.stop()
 
-    expect(mockProcess.kill).toHaveBeenCalled()
+    const stopPromise = recorder.stop()
+
+    // Simulate overlay sending back WAV data
+    expect(ipcOnceCallback).not.toBeNull()
+    ipcOnceCallback!({}, fakeWav)
+
+    const wavPath = await stopPromise
+
+    expect(mockSendToOverlay).toHaveBeenCalledWith('recording-command', 'stop')
+    expect(fs.writeFileSync).toHaveBeenCalledWith(wavPath, expect.any(Buffer))
+    expect(recorder.isRecording).toBe(false)
   })
 })
