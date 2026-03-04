@@ -31,8 +31,25 @@ export function startPipeline() {
     beginRecording()
   }
 
-  ipcMain.once('overlay-stop', () => stopRecording())
-  ipcMain.once('overlay-cancel', () => cancelPipeline())
+  ipcMain.once('overlay-stop', onStop)
+  ipcMain.once('overlay-cancel', onCancel)
+  ipcMain.on('overlay-pause', onPause)
+  ipcMain.on('overlay-resume', onResume)
+}
+
+function onStop() { stopRecording() }
+function onCancel() { cancelPipeline() }
+function onPause() {
+  if (recorder.isRecording && !recorder.isPaused) {
+    recorder.pause()
+    sendToOverlay('overlay-state', 'paused')
+  }
+}
+function onResume() {
+  if (recorder.isRecording && recorder.isPaused) {
+    recorder.resume()
+    sendToOverlay('overlay-state', 'recording')
+  }
 }
 
 async function stopRecording() {
@@ -68,6 +85,8 @@ async function stopRecording() {
     hideOverlay()
   } finally {
     isRunning = false
+    ipcMain.removeAllListeners('overlay-pause')
+    ipcMain.removeAllListeners('overlay-resume')
   }
 }
 
@@ -76,6 +95,8 @@ function cancelPipeline() {
   hideOverlay()
   isRunning = false
   ipcMain.removeAllListeners('overlay-stop')
+  ipcMain.removeAllListeners('overlay-pause')
+  ipcMain.removeAllListeners('overlay-resume')
 }
 
 ipcMain.on('overlay-close', () => {

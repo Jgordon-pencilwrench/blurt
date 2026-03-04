@@ -30,6 +30,7 @@ function renderList() {
 }
 
 function selectMode(index) {
+  hideSettingsPanel()
   selectedIndex = index
   const mode = modes[index]
   editorTitle.textContent = 'Edit Mode'
@@ -42,6 +43,7 @@ function selectMode(index) {
 }
 
 function newMode() {
+  hideSettingsPanel()
   selectedIndex = -1
   editorTitle.textContent = 'New Mode'
   modeName.value = ''
@@ -95,3 +97,117 @@ document.getElementById('delete-btn').addEventListener('click', async () => {
 document.getElementById('cancel-btn').addEventListener('click', hideEditor)
 
 load()
+
+// ── Settings section ──────────────────────────────────────
+
+const settingsPanel = document.getElementById('settings-panel')
+const hotkeyCapture = document.getElementById('hotkey-capture')
+const hotkeyDisplay = document.getElementById('hotkey-display')
+const hotkeyError   = document.getElementById('hotkey-error')
+const generalBtn    = document.getElementById('general-btn')
+
+let savedHotkey = 'Control+Alt+Space'
+let pendingHotkey = savedHotkey
+let isCapturing = false
+
+function toDisplay(electronKey) {
+  return electronKey
+    .replace('Control', '⌃')
+    .replace('Alt', '⌥')
+    .replace('Meta', '⌘')
+    .replace('Shift', '⇧')
+    .replace(/\+/g, '')
+}
+
+function fromKeyEvent(e) {
+  const mods = []
+  if (e.ctrlKey)  mods.push('Control')
+  if (e.altKey)   mods.push('Alt')
+  if (e.metaKey)  mods.push('Meta')
+  if (e.shiftKey) mods.push('Shift')
+  const isModifier = ['Control', 'Alt', 'Meta', 'Shift'].includes(e.key)
+  if (mods.length === 0 || isModifier) return null
+  const key = e.key === ' ' ? 'Space' : e.key.length === 1 ? e.key.toUpperCase() : e.key
+  return [...mods, key].join('+')
+}
+
+async function loadSettingsData() {
+  const settings = await window.prefsAPI.getSettings()
+  savedHotkey = settings.hotkey
+  pendingHotkey = savedHotkey
+  hotkeyDisplay.textContent = toDisplay(savedHotkey)
+}
+
+function showSettingsPanel() {
+  editor.classList.add('hidden')
+  emptyState.classList.add('hidden')
+  settingsPanel.classList.remove('hidden')
+  selectedIndex = -1
+  generalBtn.classList.add('selected')
+  // Deselect any mode
+  document.querySelectorAll('.mode-item').forEach(el => el.classList.remove('selected'))
+  hotkeyError.textContent = ''
+  hotkeyDisplay.textContent = toDisplay(savedHotkey)
+  pendingHotkey = savedHotkey
+}
+
+function hideSettingsPanel() {
+  settingsPanel.classList.add('hidden')
+  generalBtn.classList.remove('selected')
+}
+
+generalBtn.addEventListener('click', showSettingsPanel)
+
+// Hotkey capture
+hotkeyCapture.addEventListener('click', () => {
+  if (isCapturing) return
+  isCapturing = true
+  hotkeyCapture.classList.add('capturing')
+  hotkeyCapture.querySelector('.hotkey-hint').textContent = 'Press shortcut…'
+  hotkeyCapture.querySelector('.hotkey-hint').style.display = 'block'
+  hotkeyCapture.focus()
+})
+
+hotkeyCapture.addEventListener('keydown', (e) => {
+  if (!isCapturing) return
+  e.preventDefault()
+  e.stopPropagation()
+
+  if (e.key === 'Escape') {
+    // Cancel capture
+    isCapturing = false
+    hotkeyCapture.classList.remove('capturing')
+    hotkeyDisplay.textContent = toDisplay(pendingHotkey)
+    return
+  }
+
+  const combo = fromKeyEvent(e)
+  if (!combo) return  // still waiting for a non-modifier key
+
+  isCapturing = false
+  hotkeyCapture.classList.remove('capturing')
+  pendingHotkey = combo
+  hotkeyDisplay.textContent = toDisplay(combo)
+  hotkeyError.textContent = ''
+})
+
+document.getElementById('settings-save-btn').addEventListener('click', async () => {
+  const result = await window.prefsAPI.saveSettings({ hotkey: pendingHotkey })
+  if (result.ok) {
+    savedHotkey = pendingHotkey
+    hotkeyError.textContent = ''
+    hideSettingsPanel()
+    emptyState.classList.remove('hidden')
+  } else {
+    hotkeyError.textContent = result.error || 'Could not register shortcut'
+  }
+})
+
+document.getElementById('settings-cancel-btn').addEventListener('click', () => {
+  pendingHotkey = savedHotkey
+  hideSettingsPanel()
+  emptyState.classList.remove('hidden')
+})
+
+// Load settings on startup
+loadSettingsData()

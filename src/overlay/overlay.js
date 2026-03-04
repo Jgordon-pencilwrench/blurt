@@ -43,13 +43,45 @@ function drawWaveform() {
 
 function stopWaveform() {
   if (animFrame) cancelAnimationFrame(animFrame)
+  animFrame = null
+}
+
+// Pause state
+let isPaused = false
+
+function setRecordingVisual(paused) {
+  const dot = document.querySelector('.rec-dot')
+  const label = document.getElementById('rec-label')
+  const pauseBtn = document.getElementById('pause-btn')
+
+  if (paused) {
+    stopWaveform()
+    dot.style.background = 'rgba(255,245,220,0.3)'
+    dot.style.animationPlayState = 'paused'
+    label.textContent = 'Paused'
+    pauseBtn.textContent = 'Resume'
+    pauseBtn.classList.add('primary-btn')
+    pauseBtn.classList.remove('ghost-btn')
+  } else {
+    dot.style.background = ''
+    dot.style.animationPlayState = ''
+    label.textContent = 'Listening…'
+    pauseBtn.textContent = 'Pause'
+    pauseBtn.classList.remove('primary-btn')
+    pauseBtn.classList.add('ghost-btn')
+    startWaveform()
+  }
 }
 
 // IPC from main process
 window.electronAPI.onState((state, data) => {
   if (state === 'recording') {
     showState('recording-state')
-    startWaveform()
+    isPaused = false
+    setRecordingVisual(false)
+  } else if (state === 'paused') {
+    isPaused = true
+    setRecordingVisual(true)
   } else if (state === 'processing') {
     stopWaveform()
     document.getElementById('status-text').textContent = data || 'Transcribing...'
@@ -70,6 +102,13 @@ window.electronAPI.onState((state, data) => {
 // Button handlers
 document.getElementById('stop-btn').addEventListener('click', () => {
   window.electronAPI.send('overlay-stop')
+})
+document.getElementById('pause-btn').addEventListener('click', () => {
+  if (isPaused) {
+    window.electronAPI.send('overlay-resume')
+  } else {
+    window.electronAPI.send('overlay-pause')
+  }
 })
 document.getElementById('cancel-btn').addEventListener('click', () => {
   window.electronAPI.send('overlay-cancel')

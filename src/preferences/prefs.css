@@ -250,3 +250,75 @@ input:focus, textarea:focus {
   transition: all 0.15s;
 }
 .danger-btn:hover { background: rgba(192,57,43,0.07); }
+
+/* ── Sidebar footer ────────────────────────────────────── */
+.sidebar-footer {
+  padding: 8px;
+  border-top: 1px solid #d8d4cc;
+  flex-shrink: 0;
+}
+
+.general-nav {
+  padding: 8px 10px;
+  border-radius: 7px;
+  cursor: pointer;
+  font-size: 12px;
+  color: #9c9488;
+  transition: background 0.12s, color 0.12s;
+}
+.general-nav:hover { background: rgba(28,26,23,0.06); color: #1c1a17; }
+.general-nav.selected { background: #fff; border: 1px solid #d8d4cc; color: #1c1a17; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+
+/* ── Settings panel ────────────────────────────────────── */
+#settings-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 22px 24px 20px;
+  overflow: hidden;
+}
+#settings-panel.hidden { display: none; }
+
+.settings-header {
+  margin-bottom: 20px;
+  flex-shrink: 0;
+}
+
+/* ── Hotkey capture ────────────────────────────────────── */
+.hotkey-capture {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid #d8d4cc;
+  border-radius: 7px;
+  padding: 9px 11px;
+  background: #fff;
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  min-height: 38px;
+  font-size: 13px;
+  color: #1c1a17;
+  font-family: inherit;
+}
+
+.hotkey-capture:focus,
+.hotkey-capture.capturing {
+  outline: none;
+  border-color: #b0a898;
+  box-shadow: 0 0 0 3px rgba(176,168,152,0.15);
+}
+
+.hotkey-capture.capturing #hotkey-display { opacity: 0.4; }
+.hotkey-hint {
+  font-size: 11px;
+  color: #b0a898;
+}
+.hotkey-capture.capturing .hotkey-hint { display: none; }
+.hotkey-capture.listening .hotkey-hint { display: block; }
+
+.field-error {
+  font-size: 11px;
+  color: #c0392b;
+  min-height: 16px;
+  margin-top: 2px;
+}

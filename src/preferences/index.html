@@ -13,6 +13,9 @@
         <button id="add-btn" title="New mode">+</button>
       </div>
       <div id="modes-list"></div>
+      <div class="sidebar-footer">
+        <div id="general-btn" class="general-nav">⚙ General</div>
+      </div>
     </aside>
 
     <main id="editor-panel">
@@ -36,6 +39,23 @@
         <div class="editor-actions">
           <button id="cancel-btn" class="ghost-btn">Discard</button>
           <button id="save-btn" class="save-btn">Save</button>
+        </div>
+      </div>
+      <div id="settings-panel" class="hidden">
+        <div class="settings-header">
+          <h2>General</h2>
+        </div>
+        <div class="field">
+          <label>Global Shortcut</label>
+          <div id="hotkey-capture" class="hotkey-capture" tabindex="0" title="Click to change shortcut">
+            <span id="hotkey-display"></span>
+            <span id="hotkey-hint" class="hotkey-hint">click to change</span>
+          </div>
+          <div id="hotkey-error" class="field-error"></div>
+        </div>
+        <div class="editor-actions">
+          <button id="settings-cancel-btn" class="ghost-btn">Discard</button>
+          <button id="settings-save-btn" class="save-btn">Save</button>
         </div>
       </div>
     </main>
