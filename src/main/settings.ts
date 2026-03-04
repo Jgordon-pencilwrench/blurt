@@ -8,6 +8,8 @@ const settingsPath = path.join(configDir, 'settings.json')
 export interface Settings {
   hotkey: string
   activeModel: string
+  overlayX?: number
+  overlayY?: number
 }
 
 const DEFAULTS: Settings = {
