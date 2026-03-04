@@ -1,5 +1,6 @@
 import { BrowserWindow, screen } from 'electron'
 import path from 'path'
+import { loadSettings, saveSettings } from './settings'
 
 let overlayWin: BrowserWindow | null = null
 
@@ -10,12 +11,16 @@ export function showOverlay(): BrowserWindow {
   }
 
   const { width, height } = screen.getPrimaryDisplay().workAreaSize
+  const settings = loadSettings()
+
+  const x = settings.overlayX ?? Math.round(width / 2 - 260)
+  const y = settings.overlayY ?? Math.round(height - 220)
 
   overlayWin = new BrowserWindow({
     width: 520,
     height: 140,
-    x: Math.round(width / 2 - 260),
-    y: Math.round(height - 220),
+    x,
+    y,
     frame: false,
     transparent: true,
     alwaysOnTop: true,
@@ -32,6 +37,13 @@ export function showOverlay(): BrowserWindow {
     },
   })
 
+  overlayWin.on('moved', () => {
+    if (!overlayWin) return
+    const [posX, posY] = overlayWin.getPosition()
+    const s = loadSettings()
+    saveSettings({ ...s, overlayX: posX, overlayY: posY })
+  })
+
   overlayWin.loadFile(path.join(__dirname, '../../src/overlay/index.html'))
   overlayWin.setIgnoreMouseEvents(false)
   return overlayWin
@@ -44,7 +56,11 @@ export function hideOverlay() {
 }
 
 export function setOverlayHeight(height: number) {
-  overlayWin?.setSize(520, height)
+  if (!overlayWin) return
+  const { height: screenHeight } = screen.getPrimaryDisplay().workAreaSize
+  const [x, currentY] = overlayWin.getPosition()
+  const newY = Math.min(currentY, screenHeight - height)
+  overlayWin.setBounds({ x, y: Math.max(0, newY), width: 520, height })
 }
 
 export function sendToOverlay(channel: string, ...args: any[]) {
