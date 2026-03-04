@@ -195,6 +195,10 @@ window.electronAPI.onState((state, data) => {
       el.innerHTML = marked.parse(window._rawOutput)
     }
     document.getElementById('done-status').textContent = data || ''
+  } else if (state === 'error') {
+    stopWaveform()
+    document.getElementById('error-text').textContent = data || 'An error occurred'
+    showState('error-state')
   }
 })
 
