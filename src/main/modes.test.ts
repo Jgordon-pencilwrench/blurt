@@ -37,7 +37,7 @@ describe('modes', () => {
     )
   })
 
-  it('round-trips a mode with a vocabulary field through save and load', async () => {
+  it('loads a mode that includes a vocabulary field', async () => {
     const modesWithVocab = [
       {
         id: 'dev-note',
