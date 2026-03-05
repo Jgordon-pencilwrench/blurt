@@ -68,13 +68,15 @@ export function preprocessAudio(wavPath: string): Promise<string> {
   })
 }
 
-export function transcribe(wavPath: string): Promise<string> {
+export async function transcribe(wavPath: string): Promise<string> {
+  const preprocessedPath = await preprocessAudio(wavPath)
+
   return new Promise((resolve, reject) => {
     const bin = getWhisperBin()
     const model = getModelPath()
     const args = [
       '-m', model,
-      '-f', wavPath,
+      '-f', preprocessedPath,
       '--output-txt',
       '--no-timestamps',
       '-np',
@@ -87,18 +89,19 @@ export function transcribe(wavPath: string): Promise<string> {
       '--language', 'en',
     ]
 
-    log.info(`transcribe: ${bin} -m ${model} -f ${wavPath}`)
-    execFile(bin, args, { timeout: 30000 }, (err) => {
+    log.info(`transcribe: ${bin} -m ${model} -f ${preprocessedPath}`)
+    execFile(bin, args, { timeout: 60000 }, (err) => {
       if (err) {
         log.error('whisper-cli failed', err)
         return reject(err)
       }
-      const txtPath = wavPath + '.txt'
+      const txtPath = preprocessedPath + '.txt'
       try {
-        const text = readFileSync(txtPath, 'utf-8').trim()
+        const raw = readFileSync(txtPath, 'utf-8')
         unlinkSync(txtPath)
+        unlinkSync(preprocessedPath)
         unlinkSync(wavPath)
-        resolve(text)
+        resolve(stripHallucinations(raw))
       } catch (e) {
         reject(e)
       }

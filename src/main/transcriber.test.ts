@@ -11,31 +11,51 @@ vi.mock('fs', () => ({
 }))
 
 describe('Transcriber', () => {
-  it('calls whisper-cli with correct args and returns trimmed text', async () => {
+  beforeEach(() => {
+    mockExecFile.mockReset()
+    // Both ffmpeg and whisper-cli succeed
     mockExecFile.mockImplementation((_bin: string, _args: string[], _opts: object, cb: Function) => {
       cb(null, '', '')
     })
+  })
 
+  it('preprocesses audio then calls whisper-cli with preprocessed path', async () => {
+    vi.resetModules()
+    const { transcribe } = await import('./transcriber')
+    await transcribe('/tmp/test.wav')
+
+    // First call: ffmpeg
+    expect(mockExecFile.mock.calls[0][0]).toContain('ffmpeg')
+    expect(mockExecFile.mock.calls[0][1]).toContain('/tmp/test.wav')
+
+    // Second call: whisper-cli with preprocessed path
+    expect(mockExecFile.mock.calls[1][0]).toContain('whisper-cli')
+    expect(mockExecFile.mock.calls[1][1]).toContain('/tmp/test-preprocessed.wav')
+  })
+
+  it('returns trimmed and hallucination-stripped text', async () => {
+    const { readFileSync } = await import('fs')
+    vi.mocked(readFileSync).mockReturnValue('Hello world\n[Music]\n')
+
+    vi.resetModules()
     const { transcribe } = await import('./transcriber')
     const result = await transcribe('/tmp/test.wav')
 
-    expect(mockExecFile).toHaveBeenCalledWith(
-      expect.stringContaining('whisper-cli'),
-      expect.arrayContaining([
-        '-f', '/tmp/test.wav',
-        '--output-txt',
-        '--no-speech-thr', '0.6',
-        '--logprob-thr', '-1.0',
-        '--compression-ratio-thr', '2.4',
-        '--temperature', '0',
-        '--temperature-inc', '0.2',
-        '--beam-size', '3',
-        '--language', 'en',
-      ]),
-      expect.any(Object),
-      expect.any(Function)
-    )
     expect(result).toBe('Hello world')
+  })
+
+  it('cleans up preprocessed wav, txt output, and original wav', async () => {
+    const { unlinkSync } = await import('fs')
+    vi.mocked(unlinkSync).mockClear()
+
+    vi.resetModules()
+    const { transcribe } = await import('./transcriber')
+    await transcribe('/tmp/test.wav')
+
+    const unlinkedPaths = vi.mocked(unlinkSync).mock.calls.map((c: unknown[]) => c[0])
+    expect(unlinkedPaths).toContain('/tmp/test-preprocessed.wav.txt')
+    expect(unlinkedPaths).toContain('/tmp/test-preprocessed.wav')
+    expect(unlinkedPaths).toContain('/tmp/test.wav')
   })
 })
 
