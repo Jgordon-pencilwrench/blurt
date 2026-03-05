@@ -191,7 +191,7 @@ window.electronAPI.onState((state, data) => {
     setRecordingVisual(true)
   } else if (state === 'processing') {
     stopWaveform()
-    document.getElementById('status-text').textContent = data || 'Transcribing...'
+    document.getElementById('status-label').textContent = data || 'Transcribing…'
     showState('processing-state')
   } else if (state === 'streaming') {
     window._rawOutput = ''
