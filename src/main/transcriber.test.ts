@@ -12,20 +12,20 @@ vi.mock('fs', () => ({
 
 describe('Whisper model helpers', () => {
   it('whisperModelFileExists returns true when file is present', async () => {
-    const fs = await import('fs')
-    vi.mocked(fs.existsSync).mockReturnValue(true)
     vi.resetModules()
     const { whisperModelFileExists } = await import('./transcriber')
     const { WHISPER_CATALOG } = await import('./model-catalog')
+    const fs = await import('fs')
+    vi.mocked(fs.existsSync).mockReturnValue(true)
     expect(whisperModelFileExists(WHISPER_CATALOG[0])).toBe(true)
   })
 
   it('whisperModelFileExists returns false when file is absent', async () => {
-    const fs = await import('fs')
-    vi.mocked(fs.existsSync).mockReturnValue(false)
     vi.resetModules()
     const { whisperModelFileExists } = await import('./transcriber')
     const { WHISPER_CATALOG } = await import('./model-catalog')
+    const fs = await import('fs')
+    vi.mocked(fs.existsSync).mockReturnValue(false)
     expect(whisperModelFileExists(WHISPER_CATALOG[0])).toBe(false)
   })
 })
