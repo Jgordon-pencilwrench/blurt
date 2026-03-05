@@ -44,6 +44,28 @@ describe('Transcriber', () => {
     expect(result).toBe('Hello world')
   })
 
+  it('cleans up preprocessed wav and original on whisper failure', async () => {
+    // First call (ffmpeg) succeeds, second call (whisper) fails
+    mockExecFile
+      .mockImplementationOnce((_bin: string, _args: string[], _opts: object, cb: Function) => {
+        cb(null, '', '')
+      })
+      .mockImplementationOnce((_bin: string, _args: string[], _opts: object, cb: Function) => {
+        cb(new Error('whisper crashed'), '', '')
+      })
+
+    const { unlinkSync } = await import('fs')
+    vi.mocked(unlinkSync).mockClear()
+
+    vi.resetModules()
+    const { transcribe } = await import('./transcriber')
+    await expect(transcribe('/tmp/test.wav')).rejects.toThrow('whisper crashed')
+
+    const unlinkedPaths = vi.mocked(unlinkSync).mock.calls.map((c: unknown[]) => c[0])
+    expect(unlinkedPaths).toContain('/tmp/test-preprocessed.wav')
+    expect(unlinkedPaths).toContain('/tmp/test.wav')
+  })
+
   it('cleans up preprocessed wav, txt output, and original wav', async () => {
     const { unlinkSync } = await import('fs')
     vi.mocked(unlinkSync).mockClear()

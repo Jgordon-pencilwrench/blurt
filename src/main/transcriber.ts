@@ -93,6 +93,8 @@ export async function transcribe(wavPath: string): Promise<string> {
     execFile(bin, args, { timeout: 60000 }, (err) => {
       if (err) {
         log.error('whisper-cli failed', err)
+        try { unlinkSync(preprocessedPath) } catch {}
+        try { unlinkSync(wavPath) } catch {}
         return reject(err)
       }
       const txtPath = preprocessedPath + '.txt'
