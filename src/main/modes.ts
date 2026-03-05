@@ -9,6 +9,7 @@ export interface Mode {
   hotkey: string | null
   temperature?: number
   examples?: Array<{ input: string; output: string }>
+  vocabulary?: string[]
 }
 
 const CONFIG_DIR = path.join(os.homedir(), '.config', 'blurt')

@@ -36,4 +36,23 @@ describe('modes', () => {
       JSON.stringify(MOCK_MODES, null, 2)
     )
   })
+
+  it('round-trips a mode with a vocabulary field through save and load', async () => {
+    const modesWithVocab = [
+      {
+        id: 'dev-note',
+        name: 'Dev Note',
+        prompt: 'Technical note.',
+        hotkey: null,
+        vocabulary: ['TypeScript', 'React', 'useState'],
+      },
+    ]
+    vi.mocked(fs.existsSync).mockReturnValue(true)
+    vi.mocked(fs.readFileSync).mockReturnValue(JSON.stringify(modesWithVocab))
+
+    const { loadModes } = await import('./modes')
+    const loaded = loadModes()
+
+    expect(loaded[0].vocabulary).toEqual(['TypeScript', 'React', 'useState'])
+  })
 })
