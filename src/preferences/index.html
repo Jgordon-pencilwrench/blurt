@@ -37,6 +37,10 @@
           <label for="mode-prompt">Prompt</label>
           <textarea id="mode-prompt" placeholder="Instructions sent to the AI before your transcription…"></textarea>
         </div>
+        <div class="field-group" id="whisper-model-field">
+          <label for="mode-whisper-model">Transcription model</label>
+          <select id="mode-whisper-model"></select>
+        </div>
         <div class="editor-actions">
           <button id="cancel-btn" class="ghost-btn">Discard</button>
           <button id="save-btn" class="save-btn">Save</button>
@@ -64,6 +68,8 @@
           <h2>Model</h2>
         </div>
         <div id="model-list"></div>
+        <h3 class="section-heading">Whisper Models</h3>
+        <div id="whisper-model-list"></div>
       </div>
     </main>
   </div>

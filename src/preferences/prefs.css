@@ -443,3 +443,47 @@ input:focus, textarea:focus {
   color: #9c9488;
   margin-top: 3px;
 }
+
+.section-heading {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #888;
+  margin: 20px 0 8px;
+}
+
+.model-badge {
+  font-size: 11px;
+  color: #888;
+  padding: 2px 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.model-size {
+  color: #888;
+  font-weight: normal;
+  font-size: 12px;
+}
+
+.field-group {
+  margin-top: 12px;
+}
+
+.field-group label {
+  display: block;
+  font-size: 12px;
+  font-weight: 500;
+  margin-bottom: 4px;
+  color: #555;
+}
+
+.field-group select {
+  width: 100%;
+  padding: 6px 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 13px;
+  background: white;
+}
