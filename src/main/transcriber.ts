@@ -1,9 +1,88 @@
 import { execFile } from 'child_process'
-import { readFileSync, unlinkSync } from 'fs'
+import { readFileSync, unlinkSync, existsSync, mkdirSync, renameSync, createWriteStream } from 'fs'
 import path from 'path'
+import https from 'https'
+import os from 'os'
 import { app } from 'electron'
 import ffmpegPath from 'ffmpeg-static'
 import { log } from './logger'
+import { type WhisperModel } from './model-catalog'
+
+const WHISPER_MODELS_DIR = path.join(os.homedir(), '.config', 'blurt', 'whisper-models')
+
+export function getWhisperModelsDir(): string {
+  if (!app.isPackaged) {
+    return path.join(__dirname, '../../bin')
+  }
+  return WHISPER_MODELS_DIR
+}
+
+export function getWhisperModelPath(model: WhisperModel): string {
+  if (model.bundled) {
+    if (app.isPackaged) {
+      return path.join(process.resourcesPath, 'bin', model.filename)
+    }
+    return path.join(__dirname, '../../bin', model.filename)
+  }
+  return path.join(getWhisperModelsDir(), model.filename)
+}
+
+export function whisperModelFileExists(model: WhisperModel): boolean {
+  return existsSync(getWhisperModelPath(model))
+}
+
+export async function downloadWhisperModel(
+  model: WhisperModel,
+  onProgress: (percent: number, downloadedMB: number, totalMB: number) => void,
+): Promise<void> {
+  mkdirSync(getWhisperModelsDir(), { recursive: true })
+  const dest = getWhisperModelPath(model)
+  const tmpDest = dest + '.download'
+
+  return new Promise((resolve, reject) => {
+    function doGet(url: string) {
+      https.get(url, (res) => {
+        if (res.statusCode === 301 || res.statusCode === 302) {
+          doGet(res.headers.location!)
+          return
+        }
+        if (res.statusCode !== 200) {
+          reject(new Error(`HTTP ${res.statusCode}`))
+          return
+        }
+        const total = parseInt(res.headers['content-length'] ?? '0', 10) || model.sizeBytes
+        let downloaded = 0
+        const file = createWriteStream(tmpDest)
+        res.on('data', (chunk: Buffer) => {
+          downloaded += chunk.length
+          onProgress(
+            Math.round((downloaded / total) * 100),
+            Math.round(downloaded / 1e6),
+            Math.round(total / 1e6),
+          )
+        })
+        res.pipe(file)
+        file.on('finish', () => {
+          file.close(() => {
+            renameSync(tmpDest, dest)
+            resolve()
+          })
+        })
+        file.on('error', (err: Error) => {
+          try { unlinkSync(tmpDest) } catch {}
+          reject(err)
+        })
+      }).on('error', reject)
+    }
+    doGet(model.url)
+  })
+}
+
+export function deleteWhisperModel(model: WhisperModel): void {
+  if (model.bundled) return
+  const p = getWhisperModelPath(model)
+  if (existsSync(p)) unlinkSync(p)
+}
 
 function getWhisperBin(): string {
   if (app.isPackaged) {
