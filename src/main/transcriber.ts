@@ -92,16 +92,17 @@ function getWhisperBin(): string {
 }
 
 function resolveWhisperModelPath(whisperModelId?: string): string {
-  if (whisperModelId) {
+  if (whisperModelId && whisperModelId !== 'base.en') {
     const model = getWhisperModelById(whisperModelId)
-    if (model) {
+    if (!model) {
+      log.info(`unknown whisper model id '${whisperModelId}', falling back to base.en`)
+    } else {
       const p = getWhisperModelPath(model)
       if (existsSync(p)) return p
-      log.info(`whisper model ${whisperModelId} not found, falling back to base.en`)
+      log.info(`whisper model ${whisperModelId} not found on disk, falling back to base.en`)
     }
   }
-  const baseModel = getDefaultWhisperModel()
-  return getWhisperModelPath(baseModel)
+  return getWhisperModelPath(getDefaultWhisperModel())
 }
 
 const HALLUCINATION_PATTERNS = [
