@@ -34,7 +34,28 @@ Apply Richard Lawrence's splitting heuristics if needed:
 - Split by operations (read before write)
 - Split by UI vs. business logic vs. data layer
 
-### Phase 3: Produce the Breakdown
+### Phase 3: Assess Priority
+
+Before writing the breakdown, fetch the current open issues to calibrate priority relative to existing work:
+
+```bash
+gh issue list --state open --json number,title,labels,body --limit 50
+```
+
+Assess priority by weighing:
+- **User impact** — does this affect every recording, or only edge cases?
+- **Blocking value** — does this unlock other issues, or is it a standalone?
+- **Foundational vs. incremental** — does later work depend on this being right?
+- **Relative to existing backlog** — how does this compare to what's already queued? Assign `high` sparingly; if most things are high, nothing is.
+
+Priority meanings:
+- `high` — meaningfully more important than most open work; delays to this have real cost
+- `medium` — solid value, fits naturally into the normal queue
+- `low` — good to have, but wouldn't block shipping without it
+
+For epics, assess priority per story — stories within one epic can have different priorities.
+
+### Phase 4: Produce the Breakdown
 
 Output a structured breakdown document. Use this exact format:
 
@@ -59,6 +80,8 @@ If **Simple**, add:
 **FILES LIKELY TOUCHED:**
 - `path/to/file.ts` — what changes here
 
+**PRIORITY:** high | medium | low — (one-line rationale, e.g. "blocks G2 and G3" or "lower impact than B1–B3 currently queued")
+
 **PARALLELISM:** Safe to run in parallel with: (list groups or "none identified")
 
 **BLOCKED BY:** #N (issue number) or "none"
@@ -71,6 +94,7 @@ If **Epic**, add one story block per story:
 - Description: (one sentence)
 - Acceptance criteria: (bullets)
 - Files likely touched: (list)
+- Priority: high | medium | low — (one-line rationale)
 - Parallelism: safe / not safe (explain)
 - Blocked by: #N or none
 
@@ -83,7 +107,7 @@ If **Epic**, add one story block per story:
 
 ## Handoff
 
-After producing the breakdown, tell the human:
+After producing the breakdown (including your priority assessment with a one-line rationale), tell the human:
 
 > "Review this breakdown. When you're happy with it, run `/create-epic` and I'll create the GitHub Issues from it."
 

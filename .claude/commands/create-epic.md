@@ -12,26 +12,26 @@ Check if the breakdown says TYPE: Simple or TYPE: Epic.
 ```bash
 gh issue create \
   --title "<TITLE>" \
-  --label "<appropriate group label>" \
+  --label "<appropriate group label>,priority-<high|medium|low>" \
   --body "<formatted body with Overview, Acceptance Criteria, Files Likely Touched, Parallelism, Blocked by>"
 ```
 
 **If Epic:**
 
-First, create the parent issue:
+First, create the parent issue (use the highest priority among its stories):
 ```bash
 gh issue create \
   --title "Epic: <TITLE>" \
-  --label "<group label>" \
+  --label "<group label>,priority-<high|medium|low>" \
   --body "<Overview, story list as bullet references, parallelism notes, link to wiki page>"
 ```
 Note the parent issue number (call it PARENT_N).
 
-Then create each story as a child issue:
+Then create each story as a child issue with its own priority:
 ```bash
 gh issue create \
   --title "<story title>" \
-  --label "<group label>" \
+  --label "<group label>,priority-<high|medium|low>" \
   --body "<description, acceptance criteria, files, parallelism, Blocked by: #N if applicable>"
 ```
 
