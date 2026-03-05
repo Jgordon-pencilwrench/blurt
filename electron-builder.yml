@@ -8,6 +8,8 @@ files:
   - src/preferences/**/*
   - src/setup/**/*
   - assets/**/*
+asarUnpack:
+  - "node_modules/ffmpeg-static/**/*"
 extraResources:
   - from: bin/
     to: bin/
