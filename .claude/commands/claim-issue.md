@@ -27,9 +27,10 @@ gh issue view <N> --json number,title,body,labels,comments
 
 Check if the issue body references a wiki page (look for `Epics-` or `Features-` links). If so, fetch that page:
 ```bash
-cd /tmp && rm -rf blurt-wiki-read && \
-git clone https://github.com/Jgordon-pencilwrench/blurt.wiki.git blurt-wiki-read 2>/dev/null
-# then read the relevant page file
+WIKI=/tmp/blurt-wiki
+[ -d "$WIKI/.git" ] || git clone https://github.com/Jgordon-pencilwrench/blurt.wiki.git "$WIKI"
+cd "$WIKI" && git pull --ff-only
+# then read the relevant page file from $WIKI
 ```
 
 ## Step 4: Check what else is running
