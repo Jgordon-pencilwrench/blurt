@@ -167,16 +167,19 @@ h2 {
   flex-shrink: 0;
 }
 
-.field-grow {
-  flex: 1;
-  min-height: 0;
-  margin-bottom: 0;
+.field-prompt textarea {
+  height: 180px;
+  resize: none;
 }
 
-.field-grow textarea {
-  flex: 1;
-  min-height: 0;
+.vocabulary-input {
   resize: none;
+}
+
+.field-hint {
+  font-size: 11px;
+  color: #9c9488;
+  line-height: 1.4;
 }
 
 label {

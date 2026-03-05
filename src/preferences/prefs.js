@@ -8,6 +8,7 @@ const emptyState  = document.getElementById('empty-state')
 const editorTitle = document.getElementById('editor-title')
 const modeName    = document.getElementById('mode-name')
 const modePrompt  = document.getElementById('mode-prompt')
+const modeVocabulary = document.getElementById('mode-vocabulary')
 const deleteBtn   = document.getElementById('delete-btn')
 
 async function load() {
@@ -36,6 +37,7 @@ function selectMode(index) {
   editorTitle.textContent = 'Edit Mode'
   modeName.value = mode.name
   modePrompt.value = mode.prompt
+  modeVocabulary.value = mode.vocabulary ? mode.vocabulary.join(', ') : ''
   deleteBtn.style.display = ''
   isDirty = false
   showEditor()
@@ -48,6 +50,7 @@ function newMode() {
   editorTitle.textContent = 'New Mode'
   modeName.value = ''
   modePrompt.value = ''
+  modeVocabulary.value = ''
   deleteBtn.style.display = 'none'
   isDirty = false
   showEditor()
@@ -76,11 +79,21 @@ document.getElementById('save-btn').addEventListener('click', async () => {
     modeName.focus()
     return
   }
+  const vocabRaw = modeVocabulary.value.trim()
+  const vocabulary = vocabRaw
+    ? vocabRaw.split(',').map(s => s.trim()).filter(Boolean)
+    : undefined
+
   if (selectedIndex === -1) {
-    modes.push({ id: name.toLowerCase().replace(/\s+/g, '-'), name, prompt, hotkey: null })
+    const newMode = { id: name.toLowerCase().replace(/\s+/g, '-'), name, prompt, hotkey: null }
+    if (vocabulary) newMode.vocabulary = vocabulary
+    modes.push(newMode)
     selectedIndex = modes.length - 1
   } else {
-    modes[selectedIndex] = { ...modes[selectedIndex], name, prompt }
+    const updated = { ...modes[selectedIndex], name, prompt }
+    if (vocabulary) updated.vocabulary = vocabulary
+    else delete updated.vocabulary
+    modes[selectedIndex] = updated
   }
   await window.prefsAPI.saveModes(modes)
   isDirty = false
