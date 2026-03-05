@@ -58,10 +58,11 @@ async function stopRecording() {
   const wavPath = await recorder.stop()
 
   try {
-    sendToOverlay('overlay-state', 'processing', 'Transcribing...')
-    const rawText = await transcribe(wavPath)
     const modes = loadModes()
     const activeMode = modes.find(m => m.id === getActiveModeId()) ?? modes[0]
+
+    sendToOverlay('overlay-state', 'processing', 'Transcribing...')
+    const rawText = await transcribe(wavPath, activeMode.whisperModel)
 
     sendToOverlay('overlay-state', 'processing', 'Summarising...')
     setOverlayHeight(300)
