@@ -6,7 +6,7 @@ import os from 'os'
 import { app } from 'electron'
 import ffmpegPath from 'ffmpeg-static'
 import { log } from './logger'
-import { type WhisperModel } from './model-catalog'
+import { type WhisperModel, getWhisperModelById, getDefaultWhisperModel } from './model-catalog'
 
 const WHISPER_MODELS_DIR = path.join(os.homedir(), '.config', 'blurt', 'whisper-models')
 
@@ -91,11 +91,17 @@ function getWhisperBin(): string {
   return path.join(__dirname, '../../bin/whisper-cli')
 }
 
-function getModelPath(): string {
-  if (app.isPackaged) {
-    return path.join(process.resourcesPath, 'bin', 'ggml-base.en.bin')
+function resolveWhisperModelPath(whisperModelId?: string): string {
+  if (whisperModelId) {
+    const model = getWhisperModelById(whisperModelId)
+    if (model) {
+      const p = getWhisperModelPath(model)
+      if (existsSync(p)) return p
+      log.info(`whisper model ${whisperModelId} not found, falling back to base.en`)
+    }
   }
-  return path.join(__dirname, '../../bin/ggml-base.en.bin')
+  const baseModel = getDefaultWhisperModel()
+  return getWhisperModelPath(baseModel)
 }
 
 const HALLUCINATION_PATTERNS = [
@@ -147,12 +153,12 @@ export function preprocessAudio(wavPath: string): Promise<string> {
   })
 }
 
-export async function transcribe(wavPath: string): Promise<string> {
+export async function transcribe(wavPath: string, whisperModelId?: string): Promise<string> {
   const preprocessedPath = await preprocessAudio(wavPath)
 
   return new Promise((resolve, reject) => {
     const bin = getWhisperBin()
-    const model = getModelPath()
+    const model = resolveWhisperModelPath(whisperModelId)
     const args = [
       '-m', model,
       '-f', preprocessedPath,

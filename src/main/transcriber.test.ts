@@ -99,6 +99,36 @@ describe('Transcriber', () => {
     expect(unlinkedPaths).toContain('/tmp/test-preprocessed.wav')
     expect(unlinkedPaths).toContain('/tmp/test.wav')
   })
+
+  it('uses requested model path when that model is downloaded', async () => {
+    const fs = await import('fs')
+    // existsSync returns true for all paths (model is present)
+    vi.mocked(fs.existsSync).mockReturnValue(true)
+    vi.resetModules()
+    const { transcribe } = await import('./transcriber')
+    await transcribe('/tmp/test.wav', 'tiny.en')
+
+    // whisper-cli call is the second execFile call (after ffmpeg)
+    const whisperArgs: string[] = mockExecFile.mock.calls[1][1]
+    const modelArg = whisperArgs[whisperArgs.indexOf('-m') + 1]
+    expect(modelArg).toContain('tiny.en')
+  })
+
+  it('falls back to base.en when requested model is not downloaded', async () => {
+    const fs = await import('fs')
+    // existsSync: only returns true for paths containing 'base.en'
+    vi.mocked(fs.existsSync).mockImplementation((p: unknown) =>
+      typeof p === 'string' && p.includes('base.en')
+    )
+    vi.resetModules()
+    const { transcribe } = await import('./transcriber')
+    await transcribe('/tmp/test.wav', 'tiny.en')
+
+    // whisper-cli call is the second execFile call (after ffmpeg)
+    const whisperArgs: string[] = mockExecFile.mock.calls[1][1]
+    const modelArg = whisperArgs[whisperArgs.indexOf('-m') + 1]
+    expect(modelArg).toContain('base.en')
+  })
 })
 
 describe('stripHallucinations', () => {
