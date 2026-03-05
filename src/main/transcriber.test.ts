@@ -136,4 +136,15 @@ describe('preprocessAudio', () => {
     })
     await expect(preprocessAudio('/tmp/recording.wav')).rejects.toThrow('ffmpeg failed')
   })
+
+  it('rejects immediately if ffmpegPath is null', async () => {
+    // Temporarily override the mock to return null
+    vi.doMock('ffmpeg-static', () => ({ default: null }))
+    vi.resetModules()
+    const { preprocessAudio: freshPreprocess } = await import('./transcriber')
+    await expect(freshPreprocess('/tmp/recording.wav')).rejects.toThrow('ffmpeg binary not found')
+    // Restore original mock
+    vi.doMock('ffmpeg-static', () => ({ default: '/mock/ffmpeg' }))
+    vi.resetModules()
+  })
 })

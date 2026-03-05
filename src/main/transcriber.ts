@@ -38,6 +38,10 @@ export function stripHallucinations(transcript: string): string {
 
 export function preprocessAudio(wavPath: string): Promise<string> {
   return new Promise((resolve, reject) => {
+    if (!ffmpegPath) {
+      return reject(new Error('ffmpeg binary not found — ffmpeg-static did not bundle a binary for this platform'))
+    }
+
     const outputPath = wavPath.replace(/\.wav$/, '-preprocessed.wav')
     const filterChain = [
       'loudnorm=I=-16:TP=-1.5:LRA=11',
@@ -54,7 +58,7 @@ export function preprocessAudio(wavPath: string): Promise<string> {
     ]
 
     log.info(`preprocessAudio: ffmpeg ${args.join(' ')}`)
-    execFile(ffmpegPath as string, args, { timeout: 30000 }, (err) => {
+    execFile(ffmpegPath, args, { timeout: 30000 }, (err) => {
       if (err) {
         log.error('ffmpeg preprocessing failed', err)
         return reject(err)
