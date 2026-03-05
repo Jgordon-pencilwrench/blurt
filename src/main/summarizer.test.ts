@@ -44,7 +44,7 @@ describe('Summarizer', () => {
     expect(tokens.join('')).toBe('Hello world')
     expect(mockSpawn).toHaveBeenCalledWith(
       expect.stringContaining('llama-completion'),
-      expect.arrayContaining(['-m', expect.any(String), '--no-display-prompt']),
+      expect.arrayContaining(['-m', expect.any(String), '--no-display-prompt', '--temp', '0.7']),
     )
   })
 
