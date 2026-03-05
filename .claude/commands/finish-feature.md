@@ -51,25 +51,14 @@ EOF
 gh issue comment <N> --body "PR opened: <PR URL>. Closes on merge."
 ```
 
-## Step 5: Clean up worktree
-
-```bash
-# Get current worktree path
-worktree_path=$(git worktree list | grep $(git branch --show-current) | awk '{print $1}')
-
-# Switch to main repo first
-cd /Users/johngordon/work/blurt
-
-# Remove the worktree
-git worktree remove "$worktree_path"
-```
-
-## Step 6: Report
+## Step 5: Report
 
 Output:
 ```
 PR created: <URL>
 Issue #<N> will auto-close when PR merges.
-Worktree removed.
-Branch <name> still exists on remote — delete after merge or let GitHub do it.
+Worktree kept at <path> — available if you need changes during review.
+When you're done with it, run the clean_gone skill to remove merged branches and their worktrees.
 ```
+
+**Do not remove the worktree.** It stays alive through the PR review window so the agent can return to it if the reviewer requests changes. The human runs the `clean_gone` skill manually when ready to clean up — typically after a batch of PRs have merged.
