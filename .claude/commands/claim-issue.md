@@ -1,6 +1,6 @@
 Claim a GitHub Issue and load its context as your working brief.
 
-The human will provide the issue number. If not provided, ask for it.
+This command is typically called by the agent after presenting the selected issue to the human and receiving approval. The issue number comes from that selection — either specified by the human or chosen via `/pick-issue`.
 
 ## Step 1: Get current branch
 
