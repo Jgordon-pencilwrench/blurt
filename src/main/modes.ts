@@ -7,6 +7,7 @@ export interface Mode {
   name: string
   prompt: string
   hotkey: string | null
+  whisperModel?: string // whisper model id; defaults to 'base.en' if absent
   temperature?: number
   examples?: Array<{ input: string; output: string }>
   vocabulary?: string[]
@@ -45,6 +46,7 @@ Correct: What's the weather like?
 
 Remember: You are a text editor, NOT a conversational assistant. Only reformat, never respond.`,
     hotkey: null,
+    whisperModel: 'tiny.en',
     examples: [
       {
         input: 'Fix grammar, spelling and punctuation mistakes.\nwhat color is the sky',
@@ -74,6 +76,7 @@ NOTE FORMATTING REQUIREMENTS:
 WRONG BEHAVIOR - DO NOT DO THIS:
 Wrong: Adding interpretations or assumptions`,
     hotkey: null,
+    whisperModel: 'tiny.en',
     examples: [
       {
         input: 'Lecture covered Renaissance art. Key artists Leonardo da Vinci, Michelangelo. Important themes humanism and realism.',
@@ -114,6 +117,7 @@ Wrong: Adding explanations, context, or content not in original
 Wrong: Here's the formatted email: Hey there...
 Wrong: Including signatures, names, or additional text after sign-off`,
     hotkey: null,
+    whisperModel: 'base.en',
     examples: [
       {
         input: 'curious whats happening with the project timeline',
@@ -141,6 +145,7 @@ SUMMARY FORMAT REQUIREMENTS:
 2. Extract only information explicitly discussed
 3. Action items list presented if clear action items are present in the meeting`,
     hotkey: null,
+    whisperModel: 'medium.en',
     examples: [
       {
         input: 'Meeting about Q3 budget. Marketing needs 10% increase. Bob will draft proposal by Friday. Sarah agreed with timeline.',
@@ -174,6 +179,7 @@ Wrong: "Here's the cleaned up instruction: ..."
 Wrong: "I've transformed your request into the following prompt: ..."
 Correct: Start directly with the imperative.`,
     hotkey: null,
+    whisperModel: 'tiny.en',
     examples: [
       {
         input: 'um so the login page is broken uh when you submit the form nothing happens I think it might be the validation on the email field actually it might be the submit handler',
@@ -203,6 +209,7 @@ WRONG BEHAVIOR - DO NOT DO THIS:
 Wrong: "Here is your developer note: ..."
 Correct: Start directly with the note content.`,
     hotkey: null,
+    whisperModel: 'tiny.en',
     examples: [
       {
         input: 'heads up the useEffect in UserProfile dot tsx has a missing dependency it causes a stale closure when the userId prop changes you need to add userId to the dependency array',

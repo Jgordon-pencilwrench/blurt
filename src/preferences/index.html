@@ -37,6 +37,10 @@
           <label for="mode-prompt">Prompt</label>
           <textarea id="mode-prompt" placeholder="Instructions sent to the AI before your transcription…"></textarea>
         </div>
+        <div class="field-group" id="whisper-model-field">
+          <label for="mode-whisper-model">Transcription model</label>
+          <select id="mode-whisper-model"></select>
+        </div>
         <div class="field">
           <label for="mode-vocabulary">Vocabulary</label>
           <textarea id="mode-vocabulary" class="vocabulary-input" placeholder="TypeScript, React, useState, useEffect" rows="3"></textarea>
@@ -69,6 +73,8 @@
           <h2>Model</h2>
         </div>
         <div id="model-list"></div>
+        <h3 class="section-heading">Whisper Models</h3>
+        <div id="whisper-model-list"></div>
       </div>
     </main>
   </div>

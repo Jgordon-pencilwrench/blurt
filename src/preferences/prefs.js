@@ -2,18 +2,20 @@ let modes = []
 let selectedIndex = -1
 let isDirty = false
 
-const modesList   = document.getElementById('modes-list')
-const editor      = document.getElementById('editor')
-const emptyState  = document.getElementById('empty-state')
-const editorTitle = document.getElementById('editor-title')
-const modeName    = document.getElementById('mode-name')
-const modePrompt  = document.getElementById('mode-prompt')
-const modeVocabulary = document.getElementById('mode-vocabulary')
-const deleteBtn   = document.getElementById('delete-btn')
+const modesList        = document.getElementById('modes-list')
+const editor           = document.getElementById('editor')
+const emptyState       = document.getElementById('empty-state')
+const editorTitle      = document.getElementById('editor-title')
+const modeName         = document.getElementById('mode-name')
+const modePrompt       = document.getElementById('mode-prompt')
+const modeVocabulary   = document.getElementById('mode-vocabulary')
+const deleteBtn        = document.getElementById('delete-btn')
+const modeWhisperModel = document.getElementById('mode-whisper-model')
 
 async function load() {
   modes = await window.prefsAPI.getModes()
   renderList()
+  await renderWhisperModelSection()
 }
 
 function renderList() {
@@ -37,6 +39,7 @@ function selectMode(index) {
   editorTitle.textContent = 'Edit Mode'
   modeName.value = mode.name
   modePrompt.value = mode.prompt
+  modeWhisperModel.value = mode.whisperModel || 'base.en'
   modeVocabulary.value = mode.vocabulary ? mode.vocabulary.join(', ') : ''
   deleteBtn.style.display = ''
   isDirty = false
@@ -85,12 +88,12 @@ document.getElementById('save-btn').addEventListener('click', async () => {
     : undefined
 
   if (selectedIndex === -1) {
-    const newMode = { id: name.toLowerCase().replace(/\s+/g, '-'), name, prompt, hotkey: null }
+    const newMode = { id: name.toLowerCase().replace(/\s+/g, '-'), name, prompt, hotkey: null, whisperModel: modeWhisperModel.value || 'base.en' }
     if (vocabulary) newMode.vocabulary = vocabulary
     modes.push(newMode)
     selectedIndex = modes.length - 1
   } else {
-    const updated = { ...modes[selectedIndex], name, prompt }
+    const updated = { ...modes[selectedIndex], name, prompt, whisperModel: modeWhisperModel.value || 'base.en' }
     if (vocabulary) updated.vocabulary = vocabulary
     else delete updated.vocabulary
     modes[selectedIndex] = updated
@@ -247,6 +250,7 @@ function showModelPanel() {
   selectedIndex = -1
   modelBtn.classList.add('selected')
   renderModelPanel()
+  renderWhisperModelSection()
 }
 
 async function renderModelPanel() {
@@ -329,3 +333,81 @@ window.prefsAPI.onModelDownloadProgress(data => {
 })
 
 modelBtn.addEventListener('click', showModelPanel)
+
+// ── Whisper model panel section ──────────────────────────────────
+const whisperModelList = document.getElementById('whisper-model-list')
+let whisperModelData = null
+
+async function renderWhisperModelSection() {
+  whisperModelData = await window.prefsAPI.getWhisperModelStatus()
+  whisperModelList.innerHTML = ''
+
+  whisperModelData.forEach(m => {
+    const row = document.createElement('div')
+    row.className = 'model-row'
+    row.id = 'whisper-row-' + m.id
+
+    const actions = m.bundled
+      ? `<span class="model-badge">Bundled</span>`
+      : m.downloaded
+        ? `<button class="model-btn model-btn-delete" data-action="wdelete" data-id="${m.id}">Delete</button>`
+        : `<button class="model-btn model-btn-download" data-action="wdownload" data-id="${m.id}">Download</button>`
+
+    row.innerHTML = `
+      <div class="model-row-info">
+        <div class="model-row-name">${m.name} <span class="model-size">(${m.size})</span></div>
+        <div class="model-row-meta">${m.description}</div>
+        <div class="model-progress" id="wprogress-${m.id}" style="display:none">
+          <div class="model-progress-bar"><div class="model-progress-fill" id="wfill-${m.id}"></div></div>
+          <div class="model-progress-text" id="wptext-${m.id}"></div>
+        </div>
+      </div>
+      <div class="model-row-actions">${actions}</div>
+    `
+    whisperModelList.appendChild(row)
+  })
+
+  whisperModelList.querySelectorAll('[data-action]').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      const action = e.target.dataset.action
+      const id = e.target.dataset.id
+      if (action === 'wdownload') {
+        e.target.disabled = true
+        e.target.textContent = 'Downloading...'
+        document.getElementById('wprogress-' + id).style.display = ''
+        await window.prefsAPI.downloadWhisperModel(id)
+        await renderWhisperModelSection()
+        updateWhisperModelDropdown()
+      } else if (action === 'wdelete') {
+        await window.prefsAPI.deleteWhisperModel(id)
+        await renderWhisperModelSection()
+        updateWhisperModelDropdown()
+      }
+    })
+  })
+}
+
+window.prefsAPI.onWhisperDownloadProgress(({ modelId, percent, downloadedMB, totalMB }) => {
+  const fill = document.getElementById('wfill-' + modelId)
+  const ptext = document.getElementById('wptext-' + modelId)
+  if (fill) fill.style.width = percent + '%'
+  if (ptext) ptext.textContent = `${downloadedMB} MB / ${totalMB} MB`
+})
+
+function updateWhisperModelDropdown() {
+  if (!modeWhisperModel || !whisperModelData) return
+  const current = modeWhisperModel.value
+  modeWhisperModel.innerHTML = ''
+  whisperModelData
+    .filter(m => m.bundled || m.downloaded)
+    .forEach(m => {
+      const opt = document.createElement('option')
+      opt.value = m.id
+      opt.textContent = `${m.name} (${m.size})`
+      modeWhisperModel.appendChild(opt)
+    })
+  // Restore previous selection if still available
+  if (current && modeWhisperModel.querySelector(`option[value="${current}"]`)) {
+    modeWhisperModel.value = current
+  }
+}

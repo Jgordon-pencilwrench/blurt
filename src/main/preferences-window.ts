@@ -4,8 +4,9 @@ import { loadModes, saveModes, Mode } from './modes'
 import { loadSettings, saveSettings } from './settings'
 import { updateHotkey } from './hotkey'
 import { rebuildTrayMenu } from './tray'
-import { MODEL_CATALOG } from './model-catalog'
+import { MODEL_CATALOG, WHISPER_CATALOG } from './model-catalog'
 import { modelFileExists, downloadModel, deleteModel } from './summarizer'
+import { whisperModelFileExists, downloadWhisperModel, deleteWhisperModel } from './transcriber'
 
 let prefsWin: BrowserWindow | null = null
 
@@ -80,5 +81,30 @@ ipcMain.handle('delete-model', (_e, modelId: string) => {
   const model = MODEL_CATALOG.find((m) => m.id === modelId)
   if (!model) throw new Error(`Unknown model: ${modelId}`)
   deleteModel(model)
+  return true
+})
+
+ipcMain.handle('get-whisper-model-status', () => {
+  return WHISPER_CATALOG.map((m) => ({
+    ...m,
+    downloaded: m.bundled || whisperModelFileExists(m),
+  }))
+})
+
+ipcMain.handle('download-whisper-model', async (_e, modelId: string) => {
+  const model = WHISPER_CATALOG.find((m) => m.id === modelId)
+  if (!model) throw new Error(`Unknown whisper model: ${modelId}`)
+  if (whisperModelFileExists(model)) return true
+
+  await downloadWhisperModel(model, (percent, downloadedMB, totalMB) => {
+    prefsWin?.webContents.send('whisper-download-progress', { modelId, percent, downloadedMB, totalMB })
+  })
+  return true
+})
+
+ipcMain.handle('delete-whisper-model', (_e, modelId: string) => {
+  const model = WHISPER_CATALOG.find((m) => m.id === modelId)
+  if (!model) throw new Error(`Unknown whisper model: ${modelId}`)
+  deleteWhisperModel(model)
   return true
 })

@@ -1,8 +1,9 @@
 import { BrowserWindow, ipcMain, systemPreferences } from 'electron'
 import path from 'path'
 import { getActiveModelOption, isModelAvailable, downloadModel, modelFileExists } from './summarizer'
-import { MODEL_CATALOG } from './model-catalog'
+import { MODEL_CATALOG, WHISPER_CATALOG } from './model-catalog'
 import { loadSettings, saveSettings } from './settings'
+import { whisperModelFileExists, downloadWhisperModel } from './transcriber'
 
 export async function runSetupIfNeeded(): Promise<void> {
   const activeModel = getActiveModelOption()
@@ -90,12 +91,37 @@ function showSetupWindow(): Promise<void> {
       resolve()
     })
 
+    ipcMain.handle('setup-whisper-status', () => {
+      return WHISPER_CATALOG.filter(m => !m.bundled).map(m => ({
+        id: m.id,
+        name: m.name,
+        size: m.size,
+        downloaded: whisperModelFileExists(m),
+      }))
+    })
+
+    ipcMain.handle('setup-whisper-downloads', (_e, { tiny, medium }: { tiny: boolean; medium: boolean }) => {
+      const toDownload: string[] = []
+      if (tiny) toDownload.push('tiny.en')
+      if (medium) toDownload.push('medium.en')
+
+      for (const id of toDownload) {
+        const model = WHISPER_CATALOG.find(m => m.id === id)
+        if (model && !whisperModelFileExists(model)) {
+          downloadWhisperModel(model, () => {}).catch(() => {
+            // Background download — user can retry in Preferences > Models
+          })
+        }
+      }
+      return true
+    })
+
     win.on('closed', () => {
       if (accessibilityPollTimer) {
         clearInterval(accessibilityPollTimer)
         accessibilityPollTimer = null
       }
-      for (const ch of ['setup-status', 'select-and-download-model', 'request-mic', 'request-accessibility', 'setup-complete']) {
+      for (const ch of ['setup-status', 'select-and-download-model', 'request-mic', 'request-accessibility', 'setup-complete', 'setup-whisper-status', 'setup-whisper-downloads']) {
         ipcMain.removeHandler(ch)
       }
       resolve()

@@ -12,4 +12,10 @@ contextBridge.exposeInMainWorld('prefsAPI', {
   onModelDownloadProgress: (cb: (data: { modelId: string; percent: number; downloadedMB: number; totalMB: number }) => void) => {
     ipcRenderer.on('model-download-progress', (_e, data) => cb(data))
   },
+  getWhisperModelStatus: () => ipcRenderer.invoke('get-whisper-model-status'),
+  downloadWhisperModel: (modelId: string) => ipcRenderer.invoke('download-whisper-model', modelId),
+  deleteWhisperModel: (modelId: string) => ipcRenderer.invoke('delete-whisper-model', modelId),
+  onWhisperDownloadProgress: (cb: (data: { modelId: string; percent: number; downloadedMB: number; totalMB: number }) => void) => {
+    ipcRenderer.on('whisper-download-progress', (_e, data) => cb(data))
+  },
 })
