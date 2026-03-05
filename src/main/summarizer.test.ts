@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { EventEmitter, Readable } from 'stream'
+import type { Mode } from './modes'
 
 const mockSpawn = vi.fn()
 vi.mock('child_process', () => ({ spawn: mockSpawn }))
@@ -10,6 +11,14 @@ vi.mock('./settings', () => ({
 
 import fs from 'fs'
 vi.spyOn(fs, 'existsSync')
+
+const mockMode: Mode = {
+  id: 'message',
+  name: 'Message',
+  prompt: 'Be concise.',
+  hotkey: null,
+  examples: [],
+}
 
 describe('Summarizer', () => {
   beforeEach(() => {
@@ -28,9 +37,8 @@ describe('Summarizer', () => {
 
     const { summarize } = await import('./summarizer')
     const tokens: string[] = []
-    const gen = summarize('Hello rambling text', 'Be concise.')
+    const gen = summarize('Hello rambling text', mockMode)
 
-    // Push tokens asynchronously
     setTimeout(() => {
       stdout.push('Hello')
       stdout.push(' world')
@@ -51,7 +59,7 @@ describe('Summarizer', () => {
   it('throws if model file is missing', async () => {
     vi.mocked(fs.existsSync).mockReturnValue(false)
     const { summarize } = await import('./summarizer')
-    const gen = summarize('text', 'prompt')
+    const gen = summarize('text', mockMode)
     await expect(gen.next()).rejects.toThrow('Model not found')
   })
 })
