@@ -27,6 +27,19 @@ describe('modes', () => {
     expect(modes).toHaveLength(4)
   })
 
+  it('default modes have whisperModel set', async () => {
+    vi.mocked(fs.existsSync).mockReturnValue(false)
+    vi.resetModules()
+    const { loadModes } = await import('./modes')
+    const modes = loadModes()
+    const meeting = modes.find(m => m.id === 'meeting')
+    const message = modes.find(m => m.id === 'message')
+    const quickNote = modes.find(m => m.id === 'quick-note')
+    expect(meeting?.whisperModel).toBe('medium.en')
+    expect(message?.whisperModel).toBe('tiny.en')
+    expect(quickNote?.whisperModel).toBe('tiny.en')
+  })
+
   it('saves modes to config file', async () => {
     const writeSpy = vi.mocked(fs.writeFileSync)
     const { saveModes } = await import('./modes')
