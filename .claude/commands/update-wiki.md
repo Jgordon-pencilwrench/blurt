@@ -32,11 +32,11 @@ Use this exact template. Keep each field to one line or a tight bullet list. Be 
 
 ## Step 3: Write to wiki
 
-Access the wiki (clone once, pull if already present):
+Access the wiki (isolated per branch, clone once then reuse):
 ```bash
-WIKI=/tmp/blurt-wiki
+WIKI=/tmp/blurt-wiki-$(git branch --show-current)
 [ -d "$WIKI/.git" ] || git clone https://github.com/Jgordon-pencilwrench/blurt.wiki.git "$WIKI"
-cd "$WIKI" && git pull --ff-only
+cd "$WIKI" && git pull --rebase
 ```
 
 Check if `Features-<slug>.md` exists. If not, create it with a header:
@@ -50,10 +50,7 @@ Issue: #<N>
 Append the new session update entry to the bottom of the file.
 
 ```bash
-cd /tmp/blurt-wiki && \
-git add -A && \
-git commit -m "docs(wiki): update Features-<slug> — session notes for #<N>" && \
-git push
+cd "$WIKI" && git add -A && git commit -m "docs(wiki): update Features-<slug> — session notes for #<N>" && git push
 ```
 
 ## Step 4: Also post a comment on the issue

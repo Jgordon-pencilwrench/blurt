@@ -44,12 +44,12 @@ gh api --method POST /repos/Jgordon-pencilwrench/blurt/issues/<PARENT_N>/sub_iss
 
 ## Step 3: Create wiki epic page (epics only)
 
-Generate a slug from the title (lowercase, hyphens). Access the wiki (clone once, pull if already present), then create `Epics-<slug>.md`:
+Generate a slug from the title (lowercase, hyphens). Access the wiki (isolated per branch, clone once then reuse), then create `Epics-<slug>.md`:
 
 ```bash
-WIKI=/tmp/blurt-wiki
+WIKI=/tmp/blurt-wiki-$(git branch --show-current)
 [ -d "$WIKI/.git" ] || git clone https://github.com/Jgordon-pencilwrench/blurt.wiki.git "$WIKI"
-cd "$WIKI" && git pull --ff-only
+cd "$WIKI" && git pull --rebase
 ```
 
 Write `Epics-<slug>.md` with:
@@ -59,7 +59,7 @@ Write `Epics-<slug>.md` with:
 - "Session Notes: Updated by implementation sessions via /update-wiki"
 
 ```bash
-cd /tmp/blurt-wiki && git add -A && git commit -m "docs(wiki): add epic page for <title>" && git push
+cd "$WIKI" && git add -A && git commit -m "docs(wiki): add epic page for <title>" && git push
 ```
 
 Update `Epics-README.md` to add a row to the Current Epics table.
