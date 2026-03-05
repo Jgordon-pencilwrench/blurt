@@ -138,7 +138,7 @@ body {
   flex-direction: column;
   padding: 22px 24px 20px;
   gap: 0;
-  overflow: hidden;
+  overflow-y: auto;
 }
 
 #editor.hidden { display: none; }
