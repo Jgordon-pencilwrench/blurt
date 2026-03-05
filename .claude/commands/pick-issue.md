@@ -1,43 +1,67 @@
-List open GitHub Issues that are available to work on — unblocked and not already claimed.
+Analyze the open GitHub Issues and recommend the best one to work on next. Think — don't just list.
 
-## Step 1: Get all open issues
+## Step 1: Gather the landscape
 
 ```bash
+# All open issues with labels and body
 gh issue list --state open --json number,title,labels,body --limit 50
+
+# What's currently in-progress
+gh issue list --label in-progress --json number,title,body
 ```
 
-## Step 2: Filter
+## Step 2: Filter out unavailable issues
 
 Remove any issue that:
-- Has the `in-progress` label (already claimed by another session)
-- Has a body containing `Blocked by: #N` where issue #N is still open
+- Has the `in-progress` label (already claimed)
+- Has a body containing `Blocked by: #N` where issue #N is not yet closed
 
-To check if a dependency is resolved:
+To verify a dependency:
 ```bash
 gh issue view <N> --json state -q .state
-# must be "CLOSED" to proceed
+# must be "CLOSED"
 ```
 
-## Step 3: Display
+## Step 3: Reason about what to pick
 
-Show the remaining issues grouped by label, in this format:
+Do not just sort by priority label and pick the top result. Think through these dimensions and weigh them together:
+
+**Priority signal** (`priority-high`, `priority-medium`, `priority-low` labels)
+The priority label is a strong input but not a hard rule. Note it and factor it in.
+
+**Dependency multiplier**
+Does completing this issue unlock other issues? Check issue bodies for `Blocked by: #N` references pointing *to* this issue. An issue that unblocks two high-priority follow-ons is more valuable than a high-priority standalone.
+
+**File overlap with in-progress sessions**
+Check what files the in-progress sessions are touching (look at their issue bodies). Avoid picking an issue that touches the same core files — it will create merge conflicts and slow both sessions down.
+
+**Parallelism fit**
+Does the candidate issue say `Safe to run in parallel: yes`? Is it in a group that's already running? Prefer issues that are safely isolated from active work.
+
+**Relative effort vs. value**
+A medium-priority issue that's small and isolated may be better right now than a high-priority issue that's large and touches shared files.
+
+## Step 4: Present your recommendation
+
+Do not just list everything available. Lead with your recommendation, then show your reasoning.
+
+Format:
 
 ```
-Available issues:
+Currently in-progress: #6 (B1), #7 (B2), #5 (A2)
 
-GROUP A — Prompts & LLM Quality
-  #5  A2 · Lower LLM temperature + add output preamble stripper
+My recommendation: #<N> — <title>
 
-GROUP B — Transcription Quality  
-  #8  B3 · VAD silence stripping before Whisper
-  #9  B4 · Per-mode vocabulary → Whisper initial prompt
-  #10 B5 · Multiple Whisper model sizes + per-mode model selection
+Reasoning:
+- Priority: <high/medium/low>
+- Unlocks: <list of issues this unblocks, or "nothing immediately">
+- File overlap with in-progress: <none / describe any>
+- Parallelism: <safe / concern>
+- Why now: <1-2 sentences on why this beats the other candidates>
 
-...
-
-Epic parent issues (for browsing stories):
-  #21 Epic: Transcription Quality (Group B)
-  ...
+Other candidates considered:
+- #<N> <title> — <one-line reason not recommended>
+- #<N> <title> — <one-line reason not recommended>
 ```
 
-Also note anything currently in-progress so the human has the full picture.
+Then ask: "Shall I proceed with #<N>, or would you like to choose differently?"
