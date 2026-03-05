@@ -79,6 +79,34 @@ describe('Transcriber', () => {
     expect(unlinkedPaths).toContain('/tmp/test-preprocessed.wav')
     expect(unlinkedPaths).toContain('/tmp/test.wav')
   })
+
+  it('passes --prompt to whisper-cli when initialPrompt is provided', async () => {
+    vi.resetModules()
+    const { transcribe } = await import('./transcriber')
+    await transcribe('/tmp/test.wav', 'TypeScript, React, useState')
+
+    const whisperArgs: string[] = mockExecFile.mock.calls[1][1]
+    expect(whisperArgs).toContain('--prompt')
+    expect(whisperArgs[whisperArgs.indexOf('--prompt') + 1]).toBe('TypeScript, React, useState')
+  })
+
+  it('does not pass --prompt to whisper-cli when initialPrompt is undefined', async () => {
+    vi.resetModules()
+    const { transcribe } = await import('./transcriber')
+    await transcribe('/tmp/test.wav')
+
+    const whisperArgs: string[] = mockExecFile.mock.calls[1][1]
+    expect(whisperArgs).not.toContain('--prompt')
+  })
+
+  it('does not pass --prompt to whisper-cli when initialPrompt is empty string', async () => {
+    vi.resetModules()
+    const { transcribe } = await import('./transcriber')
+    await transcribe('/tmp/test.wav', '')
+
+    const whisperArgs: string[] = mockExecFile.mock.calls[1][1]
+    expect(whisperArgs).not.toContain('--prompt')
+  })
 })
 
 describe('stripHallucinations', () => {
