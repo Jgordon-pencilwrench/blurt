@@ -7,6 +7,7 @@ export interface Mode {
   name: string
   prompt: string
   hotkey: string | null
+  examples?: Array<{ input: string; output: string }>
 }
 
 const CONFIG_DIR = path.join(os.homedir(), '.config', 'blurt')
