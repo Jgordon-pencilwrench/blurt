@@ -39,7 +39,20 @@ export function transcribe(wavPath: string): Promise<string> {
   return new Promise((resolve, reject) => {
     const bin = getWhisperBin()
     const model = getModelPath()
-    const args = ['-m', model, '-f', wavPath, '--output-txt', '--no-timestamps', '-np']
+    const args = [
+      '-m', model,
+      '-f', wavPath,
+      '--output-txt',
+      '--no-timestamps',
+      '-np',
+      '--no-speech-thr', '0.6',
+      '--logprob-thr', '-1.0',
+      '--compression-ratio-thr', '2.4',
+      '--temperature', '0',
+      '--temperature-inc', '0.2',
+      '--beam-size', '3',
+      '--language', 'en',
+    ]
 
     log.info(`transcribe: ${bin} -m ${model} -f ${wavPath}`)
     execFile(bin, args, { timeout: 30000 }, (err) => {

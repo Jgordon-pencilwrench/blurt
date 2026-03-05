@@ -20,7 +20,17 @@ describe('Transcriber', () => {
 
     expect(mockExecFile).toHaveBeenCalledWith(
       expect.stringContaining('whisper-cli'),
-      expect.arrayContaining(['-f', '/tmp/test.wav', '--output-txt']),
+      expect.arrayContaining([
+        '-f', '/tmp/test.wav',
+        '--output-txt',
+        '--no-speech-thr', '0.6',
+        '--logprob-thr', '-1.0',
+        '--compression-ratio-thr', '2.4',
+        '--temperature', '0',
+        '--temperature-inc', '0.2',
+        '--beam-size', '3',
+        '--language', 'en',
+      ]),
       expect.any(Object),
       expect.any(Function)
     )
