@@ -131,6 +131,8 @@ window.electronAPI.onRecordingCommand((command) => {
 
 // Pause state
 let isPaused = false
+let _shimmerTimer = null
+let _outputEl = null
 
 function setRecordingVisual(paused) {
   const dot = document.querySelector('.rec-dot')
@@ -169,7 +171,7 @@ function renderWaveToken(token) {
 }
 
 function appendToken(token) {
-  const el = document.getElementById('output-text')
+  const el = _outputEl
   if (token.trim().split(/\s+/).filter(Boolean).length > 5) {
     const span = document.createElement('span')
     span.textContent = token
@@ -194,8 +196,10 @@ window.electronAPI.onState((state, data) => {
     document.getElementById('status-label').textContent = data || 'Transcribing…'
     showState('processing-state')
   } else if (state === 'streaming') {
+    if (_shimmerTimer) { clearTimeout(_shimmerTimer); _shimmerTimer = null }
     window._rawOutput = ''
     const el = document.getElementById('output-text')
+    _outputEl = el
     el.innerHTML = ''
     el.classList.remove('shimmer', 'finalized')
     showState('streaming-state')
@@ -205,7 +209,8 @@ window.electronAPI.onState((state, data) => {
   } else if (state === 'done') {
     const el = document.getElementById('output-text')
     el.classList.add('shimmer')
-    setTimeout(() => {
+    _shimmerTimer = setTimeout(() => {
+      _shimmerTimer = null
       el.classList.remove('shimmer')
       el.classList.add('finalized')
       el.innerHTML = marked.parse(window._rawOutput || '')
@@ -213,6 +218,7 @@ window.electronAPI.onState((state, data) => {
       document.getElementById('done-status').textContent = data || ''
     }, 600)
   } else if (state === 'error') {
+    if (_shimmerTimer) { clearTimeout(_shimmerTimer); _shimmerTimer = null }
     stopWaveform()
     document.getElementById('error-text').textContent = data || 'An error occurred'
     showState('error-state')
