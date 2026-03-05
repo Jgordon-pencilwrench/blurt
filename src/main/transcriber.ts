@@ -68,7 +68,7 @@ export function preprocessAudio(wavPath: string): Promise<string> {
   })
 }
 
-export async function transcribe(wavPath: string): Promise<string> {
+export async function transcribe(wavPath: string, initialPrompt?: string): Promise<string> {
   const preprocessedPath = await preprocessAudio(wavPath)
 
   return new Promise((resolve, reject) => {
@@ -88,6 +88,9 @@ export async function transcribe(wavPath: string): Promise<string> {
       '--beam-size', '3',
       '--language', 'en',
     ]
+    if (initialPrompt) {
+      args.push('--prompt', initialPrompt)
+    }
 
     log.info(`transcribe: ${bin} -m ${model} -f ${preprocessedPath}`)
     execFile(bin, args, { timeout: 60000 }, (err) => {
