@@ -690,15 +690,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/ffmpeg-static@npm:^5.1.0":
-  version: 5.1.0
-  resolution: "@types/ffmpeg-static@npm:5.1.0"
-  dependencies:
-    ffmpeg-static: "npm:*"
-  checksum: 10c0/e59ae941e9d2365ce006677c6ccfc72348deaea7a6c0f9706cf83e40577b2baf62dadee62223503c1a32fae7f3f7dc84a5d156c5e9d19573c02f4f440684c984
-  languageName: node
-  linkType: hard
-
 "@types/fs-extra@npm:9.0.13, @types/fs-extra@npm:^9.0.11":
   version: 9.0.13
   resolution: "@types/fs-extra@npm:9.0.13"
@@ -1170,7 +1161,6 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "blurt@workspace:."
   dependencies:
-    "@types/ffmpeg-static": "npm:^5.1.0"
     "@types/node": "npm:^20.0.0"
     electron: "npm:^34.0.0"
     electron-builder: "npm:^25.0.0"
@@ -2114,7 +2104,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ffmpeg-static@npm:*, ffmpeg-static@npm:^5.3.0":
+"ffmpeg-static@npm:^5.3.0":
   version: 5.3.0
   resolution: "ffmpeg-static@npm:5.3.0"
   dependencies:
