@@ -233,3 +233,60 @@ kbd {
   padding-top: 6px;
   font-family: 'Menlo', 'Monaco', monospace;
 }
+
+/* ── Wave reveal (streaming token animation) ── */
+@keyframes wave-char-reveal {
+  0%   { max-width: 0;   opacity: 0;   filter: blur(8px); }
+  40%  { max-width: 1em; opacity: 0.5; filter: blur(4px); }
+  100% { max-width: 1em; opacity: 1;   filter: blur(0px); }
+}
+
+.wave-char {
+  display: inline-block;
+  max-width: 0;
+  opacity: 0;
+  overflow: hidden;
+  white-space: pre;
+  vertical-align: bottom;
+  animation: wave-char-reveal 0.3s cubic-bezier(0.215, 0.61, 0.355, 1.0) forwards;
+}
+
+.wave-reveal-container {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+}
+
+/* ── Blinking cursor (waiting/processing state) ── */
+@keyframes cursor-blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.2; }
+}
+
+.waiting-cursor {
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  background-color: currentColor;
+  border-radius: 1px;
+  animation: cursor-blink 1.8s ease-in-out infinite;
+  vertical-align: middle;
+}
+
+/* ── Shimmer effect (finalizing state) ── */
+@keyframes text-shimmer {
+  0%, 100% { -webkit-text-fill-color: var(--shimmer-bright); }
+  50%       { -webkit-text-fill-color: var(--shimmer-dim); }
+}
+
+#output-text.shimmer {
+  --shimmer-bright: rgba(255, 248, 235, 0.95);
+  --shimmer-dim: rgba(255, 248, 235, 0.25);
+  -webkit-text-fill-color: rgba(255, 248, 235, 0.95);
+  animation: text-shimmer 1.2s ease-in-out infinite;
+}
+
+#output-text.finalized {
+  animation: none;
+  -webkit-text-fill-color: unset;
+}

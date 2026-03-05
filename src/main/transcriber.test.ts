@@ -104,11 +104,9 @@ describe('Transcriber', () => {
     vi.resetModules()
     const { transcribe } = await import('./transcriber')
     const fs = await import('fs')
-    // existsSync returns true for all paths (model is present)
     vi.mocked(fs.existsSync).mockReturnValue(true)
     await transcribe('/tmp/test.wav', 'tiny.en')
 
-    // whisper-cli call is the second execFile call (after ffmpeg)
     const whisperArgs: string[] = mockExecFile.mock.calls[1][1]
     const modelArg = whisperArgs[whisperArgs.indexOf('-m') + 1]
     expect(modelArg).toContain('tiny.en')
@@ -118,16 +116,42 @@ describe('Transcriber', () => {
     vi.resetModules()
     const { transcribe } = await import('./transcriber')
     const fs = await import('fs')
-    // existsSync: only returns true for paths containing 'base.en'
     vi.mocked(fs.existsSync).mockImplementation((p: unknown) =>
       typeof p === 'string' && p.includes('base.en')
     )
     await transcribe('/tmp/test.wav', 'tiny.en')
 
-    // whisper-cli call is the second execFile call (after ffmpeg)
     const whisperArgs: string[] = mockExecFile.mock.calls[1][1]
     const modelArg = whisperArgs[whisperArgs.indexOf('-m') + 1]
     expect(modelArg).toContain('base.en')
+  })
+
+  it('passes --prompt to whisper-cli when initialPrompt is provided', async () => {
+    vi.resetModules()
+    const { transcribe } = await import('./transcriber')
+    await transcribe('/tmp/test.wav', undefined, 'TypeScript, React, useState')
+
+    const whisperArgs: string[] = mockExecFile.mock.calls[1][1]
+    expect(whisperArgs).toContain('--prompt')
+    expect(whisperArgs[whisperArgs.indexOf('--prompt') + 1]).toBe('TypeScript, React, useState')
+  })
+
+  it('does not pass --prompt to whisper-cli when initialPrompt is undefined', async () => {
+    vi.resetModules()
+    const { transcribe } = await import('./transcriber')
+    await transcribe('/tmp/test.wav')
+
+    const whisperArgs: string[] = mockExecFile.mock.calls[1][1]
+    expect(whisperArgs).not.toContain('--prompt')
+  })
+
+  it('does not pass --prompt to whisper-cli when initialPrompt is empty string', async () => {
+    vi.resetModules()
+    const { transcribe } = await import('./transcriber')
+    await transcribe('/tmp/test.wav', undefined, '')
+
+    const whisperArgs: string[] = mockExecFile.mock.calls[1][1]
+    expect(whisperArgs).not.toContain('--prompt')
   })
 })
 

@@ -33,13 +33,18 @@
           <label for="mode-name">Name</label>
           <input id="mode-name" type="text" placeholder="e.g. Meeting Notes" autocomplete="off">
         </div>
-        <div class="field field-grow">
+        <div class="field field-prompt">
           <label for="mode-prompt">Prompt</label>
           <textarea id="mode-prompt" placeholder="Instructions sent to the AI before your transcription…"></textarea>
         </div>
         <div class="field-group" id="whisper-model-field">
           <label for="mode-whisper-model">Transcription model</label>
           <select id="mode-whisper-model"></select>
+        </div>
+        <div class="field">
+          <label for="mode-vocabulary">Vocabulary</label>
+          <textarea id="mode-vocabulary" class="vocabulary-input" placeholder="TypeScript, React, useState, useEffect" rows="3"></textarea>
+          <span class="field-hint">Comma-separated words Whisper should recognise. Improves accuracy for technical terms and names.</span>
         </div>
         <div class="editor-actions">
           <button id="cancel-btn" class="ghost-btn">Discard</button>

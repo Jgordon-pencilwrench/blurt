@@ -10,6 +10,7 @@ export interface Mode {
   whisperModel?: string // whisper model id; defaults to 'base.en' if absent
   temperature?: number
   examples?: Array<{ input: string; output: string }>
+  vocabulary?: string[]
 }
 
 const CONFIG_DIR = path.join(os.homedir(), '.config', 'blurt')

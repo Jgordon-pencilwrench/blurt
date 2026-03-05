@@ -131,6 +131,8 @@ window.electronAPI.onRecordingCommand((command) => {
 
 // Pause state
 let isPaused = false
+let _shimmerTimer = null
+let _outputEl = null
 
 function setRecordingVisual(paused) {
   const dot = document.querySelector('.rec-dot')
@@ -154,8 +156,31 @@ function setRecordingVisual(paused) {
   }
 }
 
-// Pending rAF handle for batched markdown re-renders
-let _renderFrame = null
+// ── Wave-reveal helpers ─────────────────────────────────────────────────────
+function renderWaveToken(token) {
+  const container = document.createElement('span')
+  container.className = 'wave-reveal-container'
+  ;[...token].forEach((char, i) => {
+    const span = document.createElement('span')
+    span.className = 'wave-char'
+    span.style.animationDelay = `${i * 30}ms`
+    span.textContent = char === ' ' ? '\u00A0' : char
+    container.appendChild(span)
+  })
+  return container
+}
+
+function appendToken(token) {
+  const el = _outputEl
+  if (token.trim().split(/\s+/).filter(Boolean).length > 5) {
+    const span = document.createElement('span')
+    span.textContent = token
+    el.appendChild(span)
+  } else {
+    el.appendChild(renderWaveToken(token))
+  }
+  el.scrollTop = el.scrollHeight
+}
 
 // IPC from main process
 window.electronAPI.onState((state, data) => {
@@ -168,34 +193,32 @@ window.electronAPI.onState((state, data) => {
     setRecordingVisual(true)
   } else if (state === 'processing') {
     stopWaveform()
-    document.getElementById('status-text').textContent = data || 'Transcribing...'
+    document.getElementById('status-label').textContent = data || 'Transcribing…'
     showState('processing-state')
   } else if (state === 'streaming') {
+    if (_shimmerTimer) { clearTimeout(_shimmerTimer); _shimmerTimer = null }
     window._rawOutput = ''
-    if (_renderFrame) { cancelAnimationFrame(_renderFrame); _renderFrame = null }
-    document.getElementById('output-text').innerHTML = ''
+    const el = document.getElementById('output-text')
+    _outputEl = el
+    el.innerHTML = ''
+    el.classList.remove('shimmer', 'finalized')
     showState('streaming-state')
   } else if (state === 'token') {
     window._rawOutput = (window._rawOutput || '') + data
-    // Batch re-renders to one per animation frame — avoids O(n²) work on long output
-    if (!_renderFrame) {
-      _renderFrame = requestAnimationFrame(() => {
-        const el = document.getElementById('output-text')
-        el.innerHTML = marked.parse(window._rawOutput)
-        el.scrollTop = el.scrollHeight
-        _renderFrame = null
-      })
-    }
+    appendToken(data)
   } else if (state === 'done') {
-    // Flush any pending render immediately so final output is complete
-    if (_renderFrame) {
-      cancelAnimationFrame(_renderFrame)
-      _renderFrame = null
-      const el = document.getElementById('output-text')
-      el.innerHTML = marked.parse(window._rawOutput)
-    }
-    document.getElementById('done-status').textContent = data || ''
+    const el = document.getElementById('output-text')
+    el.classList.add('shimmer')
+    _shimmerTimer = setTimeout(() => {
+      _shimmerTimer = null
+      el.classList.remove('shimmer')
+      el.classList.add('finalized')
+      el.innerHTML = marked.parse(window._rawOutput || '')
+      el.scrollTop = 0
+      document.getElementById('done-status').textContent = data || ''
+    }, 600)
   } else if (state === 'error') {
+    if (_shimmerTimer) { clearTimeout(_shimmerTimer); _shimmerTimer = null }
     stopWaveform()
     document.getElementById('error-text').textContent = data || 'An error occurred'
     showState('error-state')
