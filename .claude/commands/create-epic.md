@@ -54,7 +54,7 @@ cd "$WIKI" && git pull --rebase
 
 Write `Epics-<slug>.md` with:
 - Epic overview
-- Story table (issue number, title, status: Not started)
+- Story table (issue number, title) — no status column; GitHub Issues track status
 - Parallelism notes
 - "Session Notes: Updated by implementation sessions via /update-wiki"
 

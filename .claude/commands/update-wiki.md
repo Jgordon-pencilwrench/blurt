@@ -19,7 +19,6 @@ Use this exact template. Keep each field to one line or a tight bullet list. Be 
 ```markdown
 ## Session update — YYYY-MM-DD
 **Branch:** <branch-name>
-**Status:** in-progress | pr-open | complete
 **Decisions made:**
 - <one line per decision>
 **Gotchas:**
