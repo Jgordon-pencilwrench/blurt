@@ -10,3 +10,4 @@ bin/*.gguf
 *.wav
 *.txt
 .worktrees/
+docs/plans/

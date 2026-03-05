@@ -1,27 +1,30 @@
 # Blurt — Project Instructions
 
-## Shared knowledge
+## Where things live
 
-`docs/architecture.md` is the shared record of architectural decisions and constraints. Read it before starting work, and run `git log --oneline docs/architecture.md` to see how recently it was updated.
+| What | Where |
+|------|-------|
+| Features, status, requirements | GitHub Issues |
+| Architectural decisions, session findings | GitHub Wiki |
+| Plan files (temporary, session-local) | `docs/plans/` — gitignored, never committed |
+| Code | This repo |
 
-GitHub Issues are the live source of truth for feature status. Because parallel sessions branch from the same `main` and can't see each other's file changes until a PR merges, issues are the only way to see what's actually in flight right now.
+For the full workflow guide (idea → issues → implementation → PR), see the [GitHub Wiki](https://github.com/Jgordon-pencilwrench/blurt/wiki).
 
-## Session lifecycle
+## When implementing a feature (human-initiated only)
 
-*Only follow this when you've been asked to implement a backlog feature. For general tasks, ignore this section.*
+These steps apply when the human asks you to implement a feature or pick up an issue. Do not initiate this automatically.
 
-**At session start:**
-1. Read `docs/architecture.md` in full.
-2. Run `gh issue list --label in-progress` to see what other sessions are working on.
-3. Find your feature's issue and comment "Starting work on branch `<branch-name>`" then add the `in-progress` label: `gh issue edit <N> --add-label in-progress`.
-
-**During work:**
-- When you make an architectural decision, discover a constraint, or hit a mistake worth avoiding: add a dated entry to `docs/architecture.md`, commit it alongside your code, and post a comment on your issue summarising the finding.
-
-**Before creating your PR:**
-- Post a comment on your issue with any gotchas or schema changes that would affect dependent sessions.
-- Include `Closes #<N>` in the PR description — the issue auto-closes when the PR merges.
+1. **Read** the [Architecture/Decisions](https://github.com/Jgordon-pencilwrench/blurt/wiki/Architecture-Decisions) wiki page before touching any code.
+2. **Claim your issue** — the human will give you an issue number, or ask you to pick from an epic. Run `/claim-issue N` to claim it, read its context, and check what else is `in-progress`.
+3. **Implement** using the superpowers workflow (brainstorm → plan → subagent-driven-development).
+4. **Document findings** as you go — run `/update-wiki N` when you make an architectural decision or hit a notable constraint.
+5. **Finish** by running `/finish-feature N` — this creates the PR with `Closes #N` and does a final wiki update.
 
 ## Branch strategy
 
-Always work in a worktree on a feature branch. Finish with a PR (Option 2 in `finishing-a-development-branch`), not a local merge — this serializes integration and keeps `main` clean.
+Always work in a worktree on a feature branch. Finish with a PR — no local merges. The issue auto-closes when the PR merges.
+
+## Plan files
+
+`writing-plans` should write plan files to `docs/plans/`. They are gitignored and only live for the duration of the session. The GH issue body is the source of business requirements; the plan file is the technical how-to.
