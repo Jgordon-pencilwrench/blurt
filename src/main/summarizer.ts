@@ -105,6 +105,7 @@ function buildSystemPrompt(): string {
 function buildUserMessage(
   modePrompt: string,
   transcript: string,
+  outputType = 'formatted output',
   examples: Array<{ input: string; output: string }> = [],
   language = 'English',
 ): string {
@@ -120,6 +121,10 @@ function buildUserMessage(
     `INSTRUCTIONS:\n${modePrompt}`,
     '',
     `The user is speaking ${language}, reformatted message should also be in ${language}.`,
+    '',
+    `CRITICAL INSTRUCTION: Your response must ONLY contain the ${outputType}. Nothing else.`,
+    'Wrap your entire response in <blurt_output> tags like this:',
+    `<blurt_output>your ${outputType} here</blurt_output>`,
   ]
 
   if (examples.length > 0) {
@@ -127,7 +132,7 @@ function buildUserMessage(
     parts.push('EXAMPLES OF CORRECT BEHAVIOR:')
     for (const ex of examples) {
       parts.push(`User: ${ex.input}`)
-      parts.push(`Assistant: ${ex.output}`)
+      parts.push(`Assistant: <blurt_output>${ex.output}</blurt_output>`)
     }
   }
 
@@ -147,7 +152,7 @@ function buildUserMessage(
 
 function formatPrompt(template: ChatTemplate, mode: Mode, transcript: string): string {
   const system = buildSystemPrompt()
-  const user = buildUserMessage(mode.prompt, transcript, mode.examples ?? [])
+  const user = buildUserMessage(mode.prompt, transcript, mode.outputType, mode.examples ?? [])
 
   switch (template) {
     case 'chatml':

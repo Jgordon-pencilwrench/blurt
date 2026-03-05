@@ -7,7 +7,7 @@ import { showOverlay, hideOverlay, sendToOverlay, setOverlayHeight } from './ove
 import { loadModes } from './modes'
 import { getActiveModeId } from './tray'
 import { log } from './logger'
-import { stripPreamble } from './preamble'
+import { extractBlurtOutput } from './preamble'
 
 const recorder = new Recorder()
 let frontmostApp: string | null = null
@@ -66,17 +66,44 @@ async function stopRecording() {
     const initialPrompt = activeMode.vocabulary?.join(', ')
     const rawText = await transcribe(wavPath, activeMode.whisperModel, initialPrompt)
 
-    sendToOverlay('overlay-state', 'processing', 'Summarising...')
-    setOverlayHeight(300)
-    sendToOverlay('overlay-state', 'streaming')
+    sendToOverlay('overlay-state', 'processing', 'Thinking...')
 
+    const OPEN = '<blurt_output>'
+    const CLOSE = '</blurt_output>'
     let fullText = ''
+    let tagFound = false
+    let lastSent = 0
+
     for await (const token of summarize(rawText, activeMode)) {
       fullText += token
-      sendToOverlay('overlay-state', 'token', token)
+
+      if (!tagFound) {
+        const i = fullText.indexOf(OPEN)
+        if (i === -1) continue
+        tagFound = true
+        lastSent = i + OPEN.length
+        setOverlayHeight(300)
+        sendToOverlay('overlay-state', 'streaming')
+      }
+
+      const closeAt = fullText.indexOf(CLOSE, lastSent)
+      const safeEnd = closeAt !== -1
+        ? closeAt
+        : fullText.length - CLOSE.length
+
+      if (safeEnd > lastSent) {
+        sendToOverlay('overlay-state', 'token', fullText.slice(lastSent, safeEnd))
+        lastSent = safeEnd
+      }
     }
 
-    const cleanText = stripPreamble(fullText)
+    // If model never produced the tag, still switch to streaming so 'done' renders
+    if (!tagFound) {
+      setOverlayHeight(300)
+      sendToOverlay('overlay-state', 'streaming')
+    }
+
+    const cleanText = extractBlurtOutput(fullText)
     clipboard.writeText(cleanText)
     const canType = systemPreferences.isTrustedAccessibilityClient(false)
     if (frontmostApp && canType) {

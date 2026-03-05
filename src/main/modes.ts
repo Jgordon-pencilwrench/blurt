@@ -6,6 +6,7 @@ export interface Mode {
   id: string
   name: string
   prompt: string
+  outputType?: string // e.g. "cleaned text", "formatted email" — injected into CRITICAL INSTRUCTION
   hotkey: string | null
   whisperModel?: string // whisper model id; defaults to 'base.en' if absent
   temperature?: number
@@ -20,9 +21,8 @@ const DEFAULT_MODES: Mode[] = [
   {
     id: 'message',
     name: 'Message',
+    outputType: 'cleaned text',
     prompt: `You are a specialized text reformatting assistant. Your ONLY job is to clean up and reformat the user's text input.
-
-CRITICAL INSTRUCTION: Your response must ONLY contain the cleaned text. Nothing else.
 
 WHAT YOU DO:
 - Fix grammar, spelling, and punctuation
@@ -65,9 +65,8 @@ Remember: You are a text editor, NOT a conversational assistant. Only reformat, 
   {
     id: 'quick-note',
     name: 'Quick Note',
+    outputType: 'structured notes',
     prompt: `You are a note-taking specialist. Your job is to extract key information and organize it into structured notes.
-
-CRITICAL INSTRUCTION: Your response must ONLY contain the structured notes. Nothing else.
 
 NOTE FORMATTING REQUIREMENTS:
 1. Structure text for effective note taking
@@ -95,9 +94,8 @@ Wrong: Adding interpretations or assumptions`,
   {
     id: 'email',
     name: 'Email',
+    outputType: 'formatted email',
     prompt: `You are an email formatting specialist. Your task is to transform user messages into professional email format.
-
-CRITICAL INSTRUCTION: Your response must ONLY contain the formatted email. Nothing else.
 
 EMAIL STRUCTURE REQUIREMENTS:
 1. Greeting: "Hey there," (if no name) or "Hey [Name]," (if name provided)
@@ -136,9 +134,8 @@ Wrong: Including signatures, names, or additional text after sign-off`,
   {
     id: 'meeting',
     name: 'Meeting',
+    outputType: 'meeting summary',
     prompt: `You are a meeting transcript summarizer. Your job is to create structured summaries from actual meeting transcripts.
-
-CRITICAL INSTRUCTION: Your response must ONLY contain the meeting summary. Nothing else.
 
 SUMMARY FORMAT REQUIREMENTS:
 1. Action items clearly marked with responsible person if applicable
@@ -156,9 +153,8 @@ SUMMARY FORMAT REQUIREMENTS:
   {
     id: 'agent',
     name: 'Agent',
+    outputType: 'agent-ready instruction',
     prompt: `You are a prompt engineer. Transform the user's stream-of-consciousness dictation into a clear, direct instruction for an AI coding agent.
-
-CRITICAL INSTRUCTION: Your response must ONLY contain the agent-ready instruction. Nothing else.
 
 WHAT YOU DO:
 - Start with a clear imperative: "Fix...", "Add...", "Refactor...", "Implement..."
@@ -190,9 +186,8 @@ Correct: Start directly with the imperative.`,
   {
     id: 'dev-note',
     name: 'Dev Note',
+    outputType: 'developer note',
     prompt: `You are a technical writing assistant. Transform the spoken dictation into a clean, structured developer note.
-
-CRITICAL INSTRUCTION: Your response must ONLY contain the developer note. Nothing else.
 
 WHAT YOU DO:
 - Write as a technical reference: clear, precise, and scannable
