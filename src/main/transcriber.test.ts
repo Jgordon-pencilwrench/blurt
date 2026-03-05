@@ -31,12 +31,17 @@ describe('Whisper model helpers', () => {
 })
 
 describe('Transcriber', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     mockExecFile.mockReset()
-    // Both ffmpeg and whisper-cli succeed
     mockExecFile.mockImplementation((_bin: string, _args: string[], _opts: object, cb: Function) => {
       cb(null, '', '')
     })
+    const fs = await import('fs')
+    vi.mocked(fs.existsSync).mockReset()
+    vi.mocked(fs.existsSync).mockReturnValue(true)
+    vi.mocked(fs.readFileSync).mockReset()
+    vi.mocked(fs.readFileSync).mockReturnValue('Hello world  \n')
+    vi.mocked(fs.unlinkSync).mockReset()
   })
 
   it('preprocesses audio then calls whisper-cli with preprocessed path', async () => {
@@ -145,6 +150,35 @@ describe('Transcriber', () => {
     expect(whisperArgs).not.toContain('--prompt')
   })
 
+  it('uses --no-speech-thold flag (not --no-speech-thr)', async () => {
+    vi.resetModules()
+    const { transcribe } = await import('./transcriber')
+    await transcribe('/tmp/test.wav')
+
+    const whisperArgs: string[] = mockExecFile.mock.calls[1][1]
+    expect(whisperArgs).toContain('--no-speech-thold')
+    expect(whisperArgs).not.toContain('--no-speech-thr')
+  })
+
+  it('uses --logprob-thold flag (not --logprob-thr)', async () => {
+    vi.resetModules()
+    const { transcribe } = await import('./transcriber')
+    await transcribe('/tmp/test.wav')
+
+    const whisperArgs: string[] = mockExecFile.mock.calls[1][1]
+    expect(whisperArgs).toContain('--logprob-thold')
+    expect(whisperArgs).not.toContain('--logprob-thr')
+  })
+
+  it('does not pass --compression-ratio-thr (unsupported flag)', async () => {
+    vi.resetModules()
+    const { transcribe } = await import('./transcriber')
+    await transcribe('/tmp/test.wav')
+
+    const whisperArgs: string[] = mockExecFile.mock.calls[1][1]
+    expect(whisperArgs).not.toContain('--compression-ratio-thr')
+  })
+
   it('does not pass --prompt to whisper-cli when initialPrompt is empty string', async () => {
     vi.resetModules()
     const { transcribe } = await import('./transcriber')
@@ -152,6 +186,23 @@ describe('Transcriber', () => {
 
     const whisperArgs: string[] = mockExecFile.mock.calls[1][1]
     expect(whisperArgs).not.toContain('--prompt')
+  })
+
+  it('returns empty string when whisper exits successfully but produces no output file', async () => {
+    const fs = await import('fs')
+    vi.mocked(fs.existsSync).mockImplementation((p: unknown) =>
+      typeof p === 'string' && !p.endsWith('.txt')
+    )
+    vi.mocked(fs.unlinkSync).mockClear()
+
+    vi.resetModules()
+    const { transcribe } = await import('./transcriber')
+    const result = await transcribe('/tmp/test.wav')
+
+    expect(result).toBe('')
+    const unlinkedPaths = vi.mocked(fs.unlinkSync).mock.calls.map((c: unknown[]) => c[0])
+    expect(unlinkedPaths).toContain('/tmp/test-preprocessed.wav')
+    expect(unlinkedPaths).toContain('/tmp/test.wav')
   })
 })
 

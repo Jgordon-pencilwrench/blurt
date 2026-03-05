@@ -166,9 +166,8 @@ export async function transcribe(wavPath: string, whisperModelId?: string, initi
       '--output-txt',
       '--no-timestamps',
       '-np',
-      '--no-speech-thr', '0.6',
-      '--logprob-thr', '-1.0',
-      '--compression-ratio-thr', '2.4',
+      '--no-speech-thold', '0.6',
+      '--logprob-thold', '-1.0',
       '--temperature', '0',
       '--temperature-inc', '0.2',
       '--beam-size', '3',
@@ -179,7 +178,8 @@ export async function transcribe(wavPath: string, whisperModelId?: string, initi
     }
 
     log.info(`transcribe: ${bin} -m ${model} -f ${preprocessedPath}`)
-    execFile(bin, args, { timeout: 60000 }, (err) => {
+    execFile(bin, args, { timeout: 60000 }, (err, _stdout, stderr) => {
+      if (stderr) log.warn(`whisper-cli stderr: ${stderr.trim()}`)
       if (err) {
         log.error('whisper-cli failed', err)
         try { unlinkSync(preprocessedPath) } catch {}
@@ -187,6 +187,11 @@ export async function transcribe(wavPath: string, whisperModelId?: string, initi
         return reject(err)
       }
       const txtPath = preprocessedPath + '.txt'
+      if (!existsSync(txtPath)) {
+        try { unlinkSync(preprocessedPath) } catch {}
+        try { unlinkSync(wavPath) } catch {}
+        return resolve('')
+      }
       try {
         const raw = readFileSync(txtPath, 'utf-8')
         unlinkSync(txtPath)

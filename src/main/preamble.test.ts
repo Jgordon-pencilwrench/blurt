@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { stripPreamble } from './preamble'
+import { stripPreamble, stripThinkBlocks, stripLLMArtifacts, extractBlurtOutput, extractStreamingVisible } from './preamble'
 
 describe('stripPreamble', () => {
   it('strips "Here are your notes:" intro', () => {
@@ -69,5 +69,105 @@ describe('stripPreamble', () => {
   it('strips "Alright, here is your summary:" intro', () => {
     const input = 'Alright, here is your summary:\n\nKey takeaways below.'
     expect(stripPreamble(input)).toBe('Key takeaways below.')
+  })
+})
+
+describe('stripThinkBlocks', () => {
+  it('strips empty think block', () => {
+    expect(stripThinkBlocks('<think></think>\nHello world')).toBe('Hello world')
+  })
+
+  it('strips think block with content', () => {
+    expect(stripThinkBlocks('<think>reasoning here</think>\nHello world')).toBe('Hello world')
+  })
+
+  it('strips multiline think block', () => {
+    expect(stripThinkBlocks('<think>\nstep 1\nstep 2\n</think>\nResult')).toBe('Result')
+  })
+
+  it('passes through text with no think block', () => {
+    expect(stripThinkBlocks('Hello world')).toBe('Hello world')
+  })
+
+  it('handles partial think block (still open — incomplete stream)', () => {
+    expect(stripThinkBlocks('<think>still thinking')).toBe('')
+  })
+})
+
+describe('extractStreamingVisible', () => {
+  it('returns empty before blurt_output tag appears', () => {
+    expect(extractStreamingVisible('<think>reasoning</think>\n')).toBe('')
+  })
+
+  it('returns empty while blurt_output tag is still forming (no closing >)', () => {
+    expect(extractStreamingVisible('<blurt_output')).toBe('')
+  })
+
+  it('returns empty for bare < that could be start of opening tag', () => {
+    expect(extractStreamingVisible('<')).toBe('')
+  })
+
+  it('strips partial closing tag chars from streamed content', () => {
+    expect(extractStreamingVisible('<blurt_output>Hello</blurt_outp')).toBe('Hello')
+  })
+
+  it('strips single < that starts the closing tag sequence', () => {
+    expect(extractStreamingVisible('<blurt_output>Hello<')).toBe('Hello')
+  })
+
+  it('returns content progressively once inside open tag', () => {
+    expect(extractStreamingVisible('<blurt_output>Hello')).toBe('Hello')
+  })
+
+  it('returns trimmed content from complete tag', () => {
+    expect(extractStreamingVisible('<blurt_output>\nHello world\n</blurt_output>')).toBe('Hello world')
+  })
+
+  it('returns full content when no tags present (fallback)', () => {
+    expect(extractStreamingVisible('Hello world')).toBe('Hello world')
+  })
+
+  it('fallback strips think blocks', () => {
+    expect(extractStreamingVisible('<think>reasoning</think>\nHello world')).toBe('Hello world')
+  })
+})
+
+describe('extractBlurtOutput', () => {
+  it('extracts content from blurt_output tags', () => {
+    expect(extractBlurtOutput('<blurt_output>Hello world</blurt_output>')).toBe('Hello world')
+  })
+
+  it('ignores content outside the tags', () => {
+    expect(extractBlurtOutput('<think>reasoning</think>\n<blurt_output>Hello world</blurt_output>')).toBe('Hello world')
+  })
+
+  it('handles multiline content inside tags', () => {
+    expect(extractBlurtOutput('<blurt_output>Line one\nLine two</blurt_output>')).toBe('Line one\nLine two')
+  })
+
+  it('trims whitespace inside tags', () => {
+    expect(extractBlurtOutput('<blurt_output>\n  Hello world\n</blurt_output>')).toBe('Hello world')
+  })
+
+  it('falls back to full stripping pipeline when no tags present', () => {
+    expect(extractBlurtOutput('Hello world')).toBe('Hello world')
+  })
+
+  it('fallback strips think blocks and artifacts', () => {
+    expect(extractBlurtOutput('<think>reasoning</think>\nHello world\n[end of text]')).toBe('Hello world')
+  })
+})
+
+describe('stripLLMArtifacts', () => {
+  it('strips "[end of text]"', () => {
+    expect(stripLLMArtifacts('Hello world\n[end of text]')).toBe('Hello world')
+  })
+
+  it('strips case-insensitively', () => {
+    expect(stripLLMArtifacts('Hello world\n[END OF TEXT]')).toBe('Hello world')
+  })
+
+  it('passes through normal text', () => {
+    expect(stripLLMArtifacts('Hello world')).toBe('Hello world')
   })
 })
