@@ -18,6 +18,23 @@ function getModelPath(): string {
   return path.join(__dirname, '../../bin/ggml-base.en.bin')
 }
 
+const HALLUCINATION_PATTERNS = [
+  /^(Thanks for watching|Thank you for watching)[.!]?$/i,
+  /^Subtitles by .+$/i,
+  /^(Subscribe|Like and subscribe)[.!]?$/i,
+  /^\[Music\]$/i,
+  /^\[Applause\]$/i,
+  /^(www\.|http:\/\/)/i,
+]
+
+export function stripHallucinations(transcript: string): string {
+  return transcript
+    .split('\n')
+    .filter(line => !HALLUCINATION_PATTERNS.some(r => r.test(line.trim())))
+    .join('\n')
+    .trim()
+}
+
 export function transcribe(wavPath: string): Promise<string> {
   return new Promise((resolve, reject) => {
     const bin = getWhisperBin()
