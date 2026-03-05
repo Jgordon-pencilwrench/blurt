@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import fs from 'fs'
 
 vi.mock('fs')
@@ -15,8 +15,8 @@ describe('modes', () => {
     vi.mocked(fs.existsSync).mockReturnValue(false)
     const { loadModes } = await import('./modes')
     const modes = loadModes()
-    expect(modes).toHaveLength(4)
-    expect(modes[0].id).toBe('quick-note')
+    expect(modes).toHaveLength(6)
+    expect(modes[0].id).toBe('message')
   })
 
   it('loads modes from config file when it exists', async () => {
