@@ -63,7 +63,7 @@ async function stopRecording() {
     const activeMode = modes.find(m => m.id === getActiveModeId()) ?? modes[0]
 
     sendToOverlay('overlay-state', 'processing', 'Transcribing...')
-    const initialPrompt = activeMode.vocabulary?.join(', ') || undefined
+    const initialPrompt = activeMode.vocabulary?.join(', ')
     const rawText = await transcribe(wavPath, initialPrompt)
 
     sendToOverlay('overlay-state', 'processing', 'Summarising...')

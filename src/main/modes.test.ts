@@ -50,6 +50,7 @@ describe('modes', () => {
     vi.mocked(fs.existsSync).mockReturnValue(true)
     vi.mocked(fs.readFileSync).mockReturnValue(JSON.stringify(modesWithVocab))
 
+    vi.resetModules()
     const { loadModes } = await import('./modes')
     const loaded = loadModes()
 
