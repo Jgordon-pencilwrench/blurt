@@ -12,4 +12,6 @@ contextBridge.exposeInMainWorld('setupAPI', {
     ipcRenderer.on('accessibility-granted', () => cb())
   },
   complete: () => ipcRenderer.invoke('setup-complete'),
+  setupWhisperStatus: () => ipcRenderer.invoke('setup-whisper-status'),
+  setupWhisperDownloads: (opts: { tiny: boolean; medium: boolean }) => ipcRenderer.invoke('setup-whisper-downloads', opts),
 })

@@ -231,6 +231,29 @@
 
   <button id="done-btn" class="btn-primary">Start using Blurt &#8594;</button>
 
+  <div class="step" id="step-whisper" style="display:none">
+    <div class="step-label" id="whisper-label">
+      <span>Optional: Download faster models</span>
+    </div>
+    <p style="margin: 8px 0 12px; color: #666; font-size: 13px; line-height: 1.5;">
+      Blurt works now — base.en is already installed. Download these models for better speed and accuracy in specific modes.
+    </p>
+    <div id="whisper-options" style="margin-bottom: 8px;">
+      <label style="display:flex; align-items:center; gap:8px; margin-bottom:8px; font-size:13px; cursor:pointer;">
+        <input type="checkbox" id="dl-tiny" checked>
+        tiny.en <strong>(75 MB)</strong> — faster in Message &amp; Quick Note
+      </label>
+      <label style="display:flex; align-items:center; gap:8px; font-size:13px; cursor:pointer;">
+        <input type="checkbox" id="dl-medium" checked>
+        medium.en <strong>(1.5 GB)</strong> — higher accuracy in Meeting
+      </label>
+    </div>
+    <p style="font-size:12px; color:#999; margin: 0 0 14px;">
+      You can download these later in Settings → Models.
+    </p>
+    <button id="whisper-continue-btn" style="width:100%; padding:10px; font-size:14px;">Continue</button>
+  </div>
+
   <script>
     let status = {}
     let selectedModelId = null
@@ -368,7 +391,28 @@
     })
 
     document.getElementById('done-btn').addEventListener('click', () => {
-      window.setupAPI.complete()
+      showWhisperStep()
+    })
+
+    async function showWhisperStep() {
+      document.getElementById('done-btn').style.display = 'none'
+      document.getElementById('step-whisper').style.display = ''
+      const status = await window.setupAPI.setupWhisperStatus()
+      // If already downloaded, uncheck that model
+      status.forEach(m => {
+        if (m.downloaded) {
+          const id = m.id.replace('.en', '')
+          const el = document.getElementById('dl-' + id)
+          if (el) el.checked = false
+        }
+      })
+    }
+
+    document.getElementById('whisper-continue-btn').addEventListener('click', async () => {
+      const tiny = document.getElementById('dl-tiny').checked
+      const medium = document.getElementById('dl-medium').checked
+      await window.setupAPI.setupWhisperDownloads({ tiny, medium })
+      await window.setupAPI.complete()
     })
   </script>
 </body>
