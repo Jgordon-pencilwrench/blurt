@@ -54,4 +54,31 @@ describe('Summarizer', () => {
     const gen = summarize('text', 'prompt')
     await expect(gen.next()).rejects.toThrow('Model not found')
   })
+
+  it('passes temperature to llama-completion', async () => {
+    vi.mocked(fs.existsSync).mockReturnValue(true)
+
+    const stdout = new Readable({ read() {} })
+    const child = Object.assign(new EventEmitter(), {
+      stdout,
+      stderr: new Readable({ read() {} }),
+    })
+    mockSpawn.mockReturnValue(child)
+
+    const { summarize } = await import('./summarizer')
+    const gen = summarize('text', 'prompt', 0.2)
+
+    setTimeout(() => {
+      stdout.push('result')
+      stdout.push(null)
+      child.emit('close', 0)
+    }, 10)
+
+    for await (const _ of gen) { /* drain */ }
+
+    expect(mockSpawn).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.arrayContaining(['--temp', '0.2']),
+    )
+  })
 })

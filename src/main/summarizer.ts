@@ -102,7 +102,7 @@ function formatPrompt(template: ChatTemplate, systemPrompt: string, userText: st
   }
 }
 
-export async function* summarize(rawText: string, systemPrompt: string): AsyncGenerator<string> {
+export async function* summarize(rawText: string, systemPrompt: string, temperature = 0.7): AsyncGenerator<string> {
   const model = getActiveModelOption()
   const modelPath = getModelPath(model)
 
@@ -119,7 +119,7 @@ export async function* summarize(rawText: string, systemPrompt: string): AsyncGe
     '-no-cnv',
     '--no-display-prompt',
     '-n', '512',
-    '--temp', '0.7',
+    '--temp', String(temperature),
     '-ngl', '99',
   ])
 

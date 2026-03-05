@@ -67,7 +67,7 @@ async function stopRecording() {
     sendToOverlay('overlay-state', 'streaming')
 
     let fullText = ''
-    for await (const token of summarize(rawText, activeMode.prompt)) {
+    for await (const token of summarize(rawText, activeMode.prompt, activeMode.temperature)) {
       fullText += token
       sendToOverlay('overlay-state', 'token', token)
     }

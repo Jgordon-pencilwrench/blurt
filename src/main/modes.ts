@@ -7,6 +7,7 @@ export interface Mode {
   name: string
   prompt: string
   hotkey: string | null
+  temperature?: number
 }
 
 const CONFIG_DIR = path.join(os.homedir(), '.config', 'blurt')
