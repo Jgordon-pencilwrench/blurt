@@ -2,6 +2,7 @@ import { execFile } from 'child_process'
 import { readFileSync, unlinkSync } from 'fs'
 import path from 'path'
 import { app } from 'electron'
+import ffmpegPath from 'ffmpeg-static'
 import { log } from './logger'
 
 function getWhisperBin(): string {
@@ -33,6 +34,34 @@ export function stripHallucinations(transcript: string): string {
     .filter(line => !HALLUCINATION_PATTERNS.some(r => r.test(line.trim())))
     .join('\n')
     .trim()
+}
+
+export function preprocessAudio(wavPath: string): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const outputPath = wavPath.replace(/\.wav$/, '-preprocessed.wav')
+    const filterChain = [
+      'loudnorm=I=-16:TP=-1.5:LRA=11',
+      'silenceremove=start_periods=1:start_silence=0.3:start_threshold=-50dB:stop_periods=-1:stop_duration=0.3:stop_threshold=-50dB',
+    ].join(',')
+
+    const args = [
+      '-i', wavPath,
+      '-af', filterChain,
+      '-ar', '16000',
+      '-ac', '1',
+      '-y',
+      outputPath,
+    ]
+
+    log.info(`preprocessAudio: ffmpeg ${args.join(' ')}`)
+    execFile(ffmpegPath as string, args, { timeout: 30000 }, (err) => {
+      if (err) {
+        log.error('ffmpeg preprocessing failed', err)
+        return reject(err)
+      }
+      resolve(outputPath)
+    })
+  })
 }
 
 export function transcribe(wavPath: string): Promise<string> {

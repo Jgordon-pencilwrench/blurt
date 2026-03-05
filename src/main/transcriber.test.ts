@@ -1,8 +1,9 @@
-import { describe, it, expect, vi, beforeAll } from 'vitest'
+import { describe, it, expect, vi, beforeAll, beforeEach } from 'vitest'
 
 const mockExecFile = vi.fn()
 vi.mock('child_process', () => ({ execFile: mockExecFile }))
 vi.mock('electron', () => ({ app: { isPackaged: false } }))
+vi.mock('ffmpeg-static', () => ({ default: '/mock/ffmpeg' }))
 vi.mock('fs', () => ({
   readFileSync: vi.fn().mockReturnValue('Hello world  \n'),
   unlinkSync: vi.fn(),
@@ -78,5 +79,61 @@ describe('stripHallucinations', () => {
 
   it('trims leading/trailing whitespace from the result', () => {
     expect(stripHallucinations('\nHello\n[Music]\n')).toBe('Hello')
+  })
+})
+
+describe('preprocessAudio', () => {
+  let preprocessAudio: (wavPath: string) => Promise<string>
+
+  beforeAll(async () => {
+    vi.resetModules()
+    const mod = await import('./transcriber')
+    preprocessAudio = mod.preprocessAudio
+  })
+
+  beforeEach(() => {
+    mockExecFile.mockReset()
+    mockExecFile.mockImplementation((_bin: string, _args: string[], _opts: object, cb: Function) => {
+      cb(null, '', '')
+    })
+  })
+
+  it('calls ffmpeg with loudnorm + silenceremove filter chain', async () => {
+    await preprocessAudio('/tmp/recording.wav')
+
+    expect(mockExecFile).toHaveBeenCalledWith(
+      '/mock/ffmpeg',
+      expect.arrayContaining([
+        '-i', '/tmp/recording.wav',
+        '-af', expect.stringContaining('loudnorm'),
+        '-ar', '16000',
+        '-ac', '1',
+        '-y',
+      ]),
+      expect.any(Object),
+      expect.any(Function)
+    )
+  })
+
+  it('the ffmpeg -af filter also includes silenceremove', async () => {
+    await preprocessAudio('/tmp/recording.wav')
+
+    const call = mockExecFile.mock.calls[0]
+    const args: string[] = call[1]
+    const afIndex = args.indexOf('-af')
+    expect(afIndex).toBeGreaterThan(-1)
+    expect(args[afIndex + 1]).toContain('silenceremove')
+  })
+
+  it('returns a path ending in -preprocessed.wav', async () => {
+    const result = await preprocessAudio('/tmp/recording.wav')
+    expect(result).toMatch(/-preprocessed\.wav$/)
+  })
+
+  it('rejects if ffmpeg exits with an error', async () => {
+    mockExecFile.mockImplementation((_bin: string, _args: string[], _opts: object, cb: Function) => {
+      cb(new Error('ffmpeg failed'), '', '')
+    })
+    await expect(preprocessAudio('/tmp/recording.wav')).rejects.toThrow('ffmpeg failed')
   })
 })
