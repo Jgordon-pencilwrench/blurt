@@ -7,6 +7,7 @@ import { showOverlay, hideOverlay, sendToOverlay, setOverlayHeight } from './ove
 import { loadModes } from './modes'
 import { getActiveModeId } from './tray'
 import { log } from './logger'
+import { stripPreamble } from './preamble'
 
 const recorder = new Recorder()
 let frontmostApp: string | null = null
@@ -72,10 +73,11 @@ async function stopRecording() {
       sendToOverlay('overlay-state', 'token', token)
     }
 
-    clipboard.writeText(fullText)
+    const cleanText = stripPreamble(fullText)
+    clipboard.writeText(cleanText)
     const canType = systemPreferences.isTrustedAccessibilityClient(false)
     if (frontmostApp && canType) {
-      typeIntoApp(fullText, frontmostApp)
+      typeIntoApp(cleanText, frontmostApp)
       sendToOverlay('overlay-state', 'done', 'Typed \u2713')
     } else {
       sendToOverlay('overlay-state', 'done', 'Copied to clipboard \u2713 \u2014 press \u2318V to paste')
