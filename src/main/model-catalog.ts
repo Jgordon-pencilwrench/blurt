@@ -77,7 +77,7 @@ export const WHISPER_CATALOG: WhisperModel[] = [
     name: 'Whisper Tiny',
     filename: 'ggml-tiny.en.bin',
     size: '75 MB',
-    sizeBytes: 75_000_000,
+    sizeBytes: 75_161_536,
     url: 'https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-tiny.en.bin',
     description: 'Fastest. Best for short dictation in Message, Quick Note, and Agent modes.',
     bundled: false,
@@ -87,7 +87,7 @@ export const WHISPER_CATALOG: WhisperModel[] = [
     name: 'Whisper Base',
     filename: 'ggml-base.en.bin',
     size: '148 MB',
-    sizeBytes: 148_000_000,
+    sizeBytes: 147_964_211,
     url: 'https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-base.en.bin',
     description: 'Bundled default. Good balance of speed and accuracy.',
     bundled: true,
@@ -97,7 +97,7 @@ export const WHISPER_CATALOG: WhisperModel[] = [
     name: 'Whisper Small',
     filename: 'ggml-small.en.bin',
     size: '466 MB',
-    sizeBytes: 466_000_000,
+    sizeBytes: 487_601_408,
     url: 'https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-small.en.bin',
     description: 'Better accuracy than base.en with moderate speed.',
     bundled: false,
@@ -107,7 +107,7 @@ export const WHISPER_CATALOG: WhisperModel[] = [
     name: 'Whisper Medium',
     filename: 'ggml-medium.en.bin',
     size: '1.5 GB',
-    sizeBytes: 1_528_000_000,
+    sizeBytes: 1_533_774_848,
     url: 'https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-medium.en.bin',
     description: 'Highest accuracy. Recommended for Meeting mode.',
     bundled: false,
@@ -116,4 +116,8 @@ export const WHISPER_CATALOG: WhisperModel[] = [
 
 export function getWhisperModelById(id: string): WhisperModel | undefined {
   return WHISPER_CATALOG.find((m) => m.id === id)
+}
+
+export function getDefaultWhisperModel(): WhisperModel {
+  return WHISPER_CATALOG.find((m) => m.bundled)!
 }
