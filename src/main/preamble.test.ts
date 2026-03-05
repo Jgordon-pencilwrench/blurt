@@ -50,4 +50,24 @@ describe('stripPreamble', () => {
   it('handles empty string', () => {
     expect(stripPreamble('')).toBe('')
   })
+
+  it('strips "Of course! Here are..." intro', () => {
+    const input = 'Of course! Here are your notes:\n\n- Item A'
+    expect(stripPreamble(input)).toBe('- Item A')
+  })
+
+  it('strips "Absolutely! Here is..." intro', () => {
+    const input = 'Absolutely! Here is the cleaned text:\n\nReady to send.'
+    expect(stripPreamble(input)).toBe('Ready to send.')
+  })
+
+  it('strips "The following notes have been cleaned:" intro', () => {
+    const input = 'The following notes have been cleaned:\n\n- Point 1'
+    expect(stripPreamble(input)).toBe('- Point 1')
+  })
+
+  it('strips "Alright, here is your summary:" intro', () => {
+    const input = 'Alright, here is your summary:\n\nKey takeaways below.'
+    expect(stripPreamble(input)).toBe('Key takeaways below.')
+  })
 })
